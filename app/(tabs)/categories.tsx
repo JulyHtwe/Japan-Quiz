@@ -13,9 +13,9 @@ export default function HomeScreen() {
       style={styles.bgImage}
     >
       <View>
-        <Text style={[styles.header, { marginTop: "15%" }]}>Categories</Text>
+        <Text style={[styles.header, { marginTop: "20%" }]}>Categories</Text>
         <View style={styles.container}>
-          <View style={[styles.cat_btn, { marginTop: "10%" }]}>
+          <View style={[styles.cat_btn, { marginTop: "15%" }]}>
             <Image
               style={styles.cate_png}
               source={require("../../assets/images/cate_foot.png")}
@@ -64,8 +64,8 @@ export default function HomeScreen() {
             <Text style={[styles.middleText, { color: "black", fontSize: 30 }]}>
               Comfirm
             </Text>
-        </View>
       </View>
+      </View>  
     </ImageBackground>
   );
 }
@@ -90,11 +90,11 @@ const styles = StyleSheet.create({
     // flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    gap: 15,
+    gap: 20,
   },
   cat_btn: {
     flexDirection: "row",
-    gap: 20,
+    gap: 30,
     width: 300,
     height: 60,
     backgroundColor: "white",
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
   },
   btn: {
     position: "absolute",
-    bottom: -140,
+    bottom: -150,
     width: 250,
     height: 80,
     backgroundColor: "white",
