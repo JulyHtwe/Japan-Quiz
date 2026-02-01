@@ -16,12 +16,20 @@
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
     "expo": "~54.0.32",
+<<<<<<< HEAD
+=======
+    "expo-av": "^16.0.8",
+>>>>>>> f92cdc1 (json)
     "expo-constants": "~18.0.13",
     "expo-font": "~14.0.11",
     "expo-haptics": "~15.0.8",
     "expo-image": "~3.0.11",
     "expo-linking": "~8.0.11",
+<<<<<<< HEAD
     "expo-router": "~6.0.22",
+=======
+    "expo-router": "^6.0.22",
+>>>>>>> f92cdc1 (json)
     "expo-splash-screen": "~31.0.13",
     "expo-status-bar": "~3.0.9",
     "expo-symbols": "~1.0.8",
@@ -39,9 +47,15 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.0",
+<<<<<<< HEAD
     "typescript": "~5.9.2",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0"
+=======
+    "eslint": "^9.25.0",
+    "eslint-config-expo": "~10.0.0",
+    "typescript": "~5.9.2"
+>>>>>>> f92cdc1 (json)
   },
   "private": true
 }
