@@ -15,7 +15,7 @@ const [fontLoaded] = useFonts({
       style={styles.bgImage}
     >
       <View>
-        <Text style={[styles.header, {marginTop: '15%'}]}>Hello Japan</Text>
+        <Text style={[styles.header, {marginTop: '20%'}]}>Hello Japan</Text>
         <View style= {{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 20,gap:30}}>
         <Image source={require('../assets/images/japan-flag.png')} style={{width: 80, height: 80}}></Image>
         <Text style={styles.header}>Quiz</Text>
@@ -23,7 +23,7 @@ const [fontLoaded] = useFonts({
         </View>
       </View>
       <View>
-        <Text style= {[styles.middleText,{marginTop: '10%'}]}>Let's Learn</Text>
+        <Text style= {[styles.middleText,{marginTop: '15%'}]}>Let's Learn</Text>
         <Text style= {styles.middleText}>Japanese Vocab</Text>
         <Text style= {styles.middleText}>The Fun Way!</Text>
         <Text style= {[styles.middleText,{marginTop: '15%'}]}>Ready it test your</Text>
@@ -34,7 +34,7 @@ const [fontLoaded] = useFonts({
           <Image source={require('../assets/images/b1-startup.png')} style= {{position: 'absolute', right: 15,width: 45, height: 45}}></Image>
         </Pressable>
       </View>
-      <Image source={require('../assets/images/b1_girl.png')} style= {{position: 'absolute', bottom: 130, right: 0,width: 80, height: 80,transform:[{rotate: '330deg'}]}}></Image>
+      <Image source={require('../assets/images/b1_girl.png')} style= {{position: 'absolute', bottom: 240, right: 10,width: 80, height: 80,transform:[{rotate: '330deg'}]}}></Image>
     </ImageBackground>
   )
 }

@@ -22,15 +22,21 @@ const IMAGE_BASE_URL =
 const AUDIO_BASE_URL =
   "https://raw.githubusercontent.com/JulyHtwe/japan_quiz/main/audio/";
 
-const shuffle = <T,>(arr: T[]) =>
-  [...arr].sort(() => Math.random() - 0.5);
+const shuffle = <T,>(arr: T[]) => [...arr].sort(() => Math.random() - 0.5);
 
 export default function QuestionScreen() {
-  const { category } = useLocalSearchParams<{ category: Category }>();
   const router = useRouter();
+  const { category, index = "0", score = "0" } =
+    useLocalSearchParams<{
+      category: Category;
+      index?: string;
+      score?: string;
+    }>();
+
+  const currentIndex = Number(index);
+  const currentScore = Number(score);
 
   const [quizList, setQuizList] = useState<QuizItem[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [question, setQuestion] = useState<QuizItem | null>(null);
   const [options, setOptions] = useState<QuizItem[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
@@ -40,18 +46,14 @@ export default function QuestionScreen() {
     Margarine: require("../assets/fonts/Margarine-Regular.ttf"),
   });
 
-  /* 🔹 Fetch JSON and pick random 10 */
   useEffect(() => {
     fetch(JSON_URL)
       .then(res => res.json())
       .then((data: QuizData) => {
-        const random10 = shuffle(data[category!]).slice(0, 10);
-        setQuizList(random10);
-        setCurrentIndex(0);
+        setQuizList(shuffle(data[category]).slice(0, 10));
       });
   }, []);
 
-  /* 🔹 Load question + options */
   useEffect(() => {
     if (!quizList.length) return;
 
@@ -73,171 +75,111 @@ export default function QuestionScreen() {
     await sound.playAsync();
   };
 
-  if (!fontLoaded || !question) return null;
+  if (!fontLoaded || !question) {
+    return (
+      <View style={styles.loading}>
+        <Text style={{ fontFamily: "Kavoon", fontSize: 20 }}>
+          Loading...
+        </Text>
+      </View>
+    );
+  }
+  const progressPercent = ((currentIndex + 1) / 10) * 100;
 
   return (
     <ImageBackground
       source={require("../assets/images/bg_3.png")}
       style={styles.bgImage}
     >
-      {/* TOP */}
-<View style={styles.container}>
-  <Text style={styles.question_no}>
-    Question {currentIndex + 1} of 10
-  </Text>
+      <Text style={styles.question_no}>
+        Question {currentIndex + 1} of 10
+      </Text>
 
-  {/* Progress Bar */}
-  <View style={styles.progressBg}>
-    <View
-      style={[
-        styles.progressFill,
-        { width: `${((currentIndex + 1) / 10) * 100}%` },
-      ]}
-    />
-  </View>
-</View>
-
-      {/* QUESTION TEXT */}
-      <View style={[styles.cat_btn, { marginTop: "20%" }]}>
-        <Text style={[styles.cat_middleText, { color: "black", fontSize: 30 }]}>
-          What does this Japanese word mean?
-        </Text>
+      {/* Progress Bar */}
+      <View style={styles.progressBg}>
+        <View style={[styles.progressFill, { width: `${progressPercent}%` }]} />
       </View>
 
-      {/* WORD */}
+      <View style={[styles.complete_btn, { marginTop: "30%" }]}>
+              <Text style={[styles.cat_middleText, { color: "black", fontSize: 30 }]}>
+                What does this japanese word mean?
+              </Text>
+            </View>
+
       <Text style={styles.word}>{question.name}</Text>
 
-      {/* AUDIO */}
-      <Pressable style={styles.sound_btn} onPress={playAudio}>
-        <Image
-          source={require("../assets/images/volume.png")}
-          style={{ width: 30, height: 30 }}
-        />
-        <Text style={[styles.middleText, { color: "black" }]}>
-          Hear it!
-        </Text>
-      </Pressable>
+      <Pressable style={styles.soundBtn} onPress={playAudio}>
+                <Image source={require("../assets/images/volume.png")} style={{width:30,height:30}}></Image><Text style={styles.middleText}> Hear it!</Text>
+              </Pressable>
 
-      {/* ANSWERS */}
       <View style={styles.answerContainer}>
         {options.map(item => (
           <Pressable
             key={item.image}
             style={[
               styles.circle,
-              selected === item.image && {
-                backgroundColor: "gray",
-                borderColor: "#FFF3B0",
-                borderWidth: 4,
-              },
+              selected === item.image && { backgroundColor: "gray",borderColor:"pink",borderWidth:3 },
             ]}
             onPress={() => setSelected(item.image)}
           >
             <Image
               source={{ uri: IMAGE_BASE_URL + item.image }}
-              style={styles.answerImage}
+              style={{ width: 60, height: 60 }}
             />
           </Pressable>
         ))}
       </View>
 
-      {/* CONFIRM */}
       <Pressable
         style={styles.btn}
         disabled={!selected}
         onPress={() => {
-          if (selected === question.image) {
-            router.push({
-              pathname: "/correct",
-              params: { correctAnswer: question },
-            });
-          } else {
-            router.push({
-              pathname: "/incorrect",
-              params: { correctAnswer: question },
-            });
-          }
-          
+          const isCorrect = selected === question.image;
+
+          router.replace({
+            pathname: isCorrect ? "/correct" : "/incorrect",
+            params: {
+              name: question.name,
+              image: question.image,
+              audio: question.audio,
+              category,
+              index: currentIndex.toString(),
+              score: isCorrect ? currentScore + 1 : currentScore,
+            },
+          });
         }}
       >
-        <Text style={[styles.middleText, { color: "black", fontSize: 30 }]}>
-          Confirm
-        </Text>
+        <Text style={[styles.middleText,{fontSize:30}]}>Comfirm</Text>
       </Pressable>
     </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  bgImage: { flex: 1, width: "100%", height: "100%" },
-  container: { left:25},
-
-  question_no: {
-    paddingTop: 50,
-    fontSize: 20,
-    fontFamily: "Kavoon",
-    color: "black",
-    textShadowColor: "white",
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 5,
-  },
-  progressBg: {
+  bgImage: { flex: 1 },
+  loading: { flex: 1, justifyContent: "center", alignItems: "center" },
+  question_no: { marginTop: 60, fontFamily: "Kavoon", fontSize: 20 ,marginLeft:35},
+    progressBg: {
     width: "80%",
     height: 10,
     backgroundColor: "#eee",
     borderRadius: 10,
     marginTop: 10,
+    alignSelf: "center",
     overflow: "hidden",
   },
-  
   progressFill: {
     height: "100%",
     backgroundColor: "#FFE066",
     borderRadius: 10,
   },
-  
-
-  cat_btn: {
-    width: 350,
-    height: 130,
-    backgroundColor: "white",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 75,
-    alignSelf: "center",
-  },
-
-  cat_middleText: {
-    fontFamily: "Margarine",
-    textAlign: "center",
-  },
-
-  word: {
-    fontSize: 90,
-    fontFamily: "Kavoon",
-    textAlign: "center",
-    marginVertical: 20,
-  },
-
-  sound_btn: {
-    flexDirection: "row",
-    gap: 10,
-    width: 150,
-    height: 50,
-    backgroundColor: "white",
-    borderWidth: 2,
-    borderRadius: 50,
-    justifyContent: "center",
-    alignItems: "center",
-    alignSelf: "center",
-  },
-
+  word: { fontSize: 60, fontFamily: "Kavoon", textAlign: "center",marginTop:20 },
+  soundBtn: { flexDirection:'row',marginTop:20,padding: 10, backgroundColor: "white", borderRadius: 20,width:130,alignSelf:"center",marginBottom:30 },
   answerContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
     marginTop: 30,
   },
-
   circle: {
     width: 80,
     height: 80,
@@ -245,17 +187,15 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
   },
-
-  answerImage: {
-    width: 60,
-    height: 60,
-    resizeMode: "contain",
-  },
-
-  btn: {
+ btn: {
     position: "absolute",
-    bottom: 0,
+    bottom: 70,
     width: 250,
     height: 80,
     backgroundColor: "white",
@@ -266,9 +206,23 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     alignSelf: "center",
   },
-
-  middleText: {
-    fontFamily: "Kavoon",
+  middleText: { fontFamily: "Kavoon", fontSize: 20, textAlign: "center" },
+  complete_btn: {
+    flexDirection: "row",
+    gap: 30,
+    width: 329,
+    height: 120,
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 75,
+    alignSelf: "center",
+  },
+  cat_middleText: {
+    fontSize: 35,
+    color: "white",
+    fontFamily: "Margarine",
+    textShadowRadius: 8,
     textAlign: "center",
   },
 });

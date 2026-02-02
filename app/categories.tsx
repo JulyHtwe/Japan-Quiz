@@ -15,7 +15,7 @@ export default function CategoriesScreen() {
   const categories = [
     { name: "Animals", image: require("../assets/images/cate_foot.png") },
     { name: "Numbers", image: require("../assets/images/cate_number.png") },
-    { name: "Countries", image: require("../assets/images/cate_countries.png") },
+    { name: "Fruits", image: require("../assets/images/fruit.png") },
     { name: "Foods", image: require("../assets/images/cate_food.png") },
   ];
 
@@ -31,7 +31,7 @@ export default function CategoriesScreen() {
             key={cat.name}
             style={[
               styles.cat_btn,
-              { backgroundColor: selected === cat.name ? "pink" : "white" },
+              { backgroundColor: selected === cat.name ? "pink" : "white" ,marginTop:15},
             ]}
             onPress={() => setSelected(cat.name)}
           >
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
   cate_png: { width: 50, height: 50 },
   btn: {
     position: "absolute",
-    bottom: 50,
+    bottom: 80,
     width: 250,
     height: 80,
     borderColor: "pink",
