@@ -15,17 +15,22 @@ const AUDIO_BASE_URL =
 const IMAGE_BASE_URL =
   "https://raw.githubusercontent.com/JulyHtwe/japan_quiz/main/images/";
 
-export default function Incorrect() {
+export default function Correct() {
   const router = useRouter();
 
-  const { name, image, audio, category, index, score } = useLocalSearchParams<{
-    name: string;
-    image: string;
-    audio: string;
-    category: string;
-    index: string;
-    score: string;
-  }>();
+  const { name, image, audio, category, index, score } =
+    useLocalSearchParams<{
+      name: string;
+      image: string;
+      audio: string;
+      category: string;
+      index: string;
+      score: string;
+    }>();
+
+  const currentIndex = Number(index);
+  const totalQuestions = 10;
+  const isLastQuestion = currentIndex + 1 === totalQuestions;
 
   const [fontLoaded] = useFonts({
     Kavoon: require("../assets/fonts/Kavoon-Regular.ttf"),
@@ -51,14 +56,13 @@ export default function Incorrect() {
           style={styles.icon}
           source={require("../assets/images/check.png")}
         />
-
-        <Text style={styles.title}>Correct!</Text>
+        <Text style={styles.title}>Correct</Text>
         <Text style={styles.subtitle}>The correct answer is:</Text>
 
         <View style={styles.imageShadow}>
           <Image
             source={{ uri: IMAGE_BASE_URL + image }}
-            style={{ width: 100, height: 100,alignItems:"center",justifyContent:"center",marginTop:30 }}
+            style={styles.answerImage}
           />
         </View>
 
@@ -71,31 +75,32 @@ export default function Incorrect() {
         <Pressable
           style={styles.btn}
           onPress={() => {
-            const nextIndex = Number(index) + 1;
-
-            if (nextIndex === 10) {
+            if (isLastQuestion) {
               router.replace({
                 pathname: "/complete",
-                params: { score },
+                params: { score, category },
               });
             } else {
               router.replace({
                 pathname: "/question",
                 params: {
                   category,
-                  index: nextIndex.toString(),
+                  index: (currentIndex + 1).toString(),
                   score,
                 },
               });
             }
           }}
         >
-          <Text style={[styles.middleText, { fontSize: 30 }]}>Next Word</Text>
+          <Text style={[styles.middleText, { fontSize: 30 }]}>
+            {isLastQuestion ? "Complete Quiz" : "Next Word"}
+          </Text>
         </Pressable>
       </View>
     </ImageBackground>
   );
 }
+
 const styles = StyleSheet.create({
   bgImage: { flex: 1, width: "100%", height: "100%" },
   container: {
@@ -104,7 +109,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  icon: { width: 80, height: 80 },
+  icon: {
+    width: 80,
+    height: 80,
+    elevation: 10,
+    borderRadius: 40,
+  },
   title: {
     fontSize: 50,
     fontFamily: "Kavoon",
@@ -119,10 +129,15 @@ const styles = StyleSheet.create({
     color: "black",
     marginTop: 30,
   },
-  correctText: { fontSize: 50, fontFamily: "Kavoon", color: "black",marginTop:50 },
+  correctText: {
+    fontSize: 50,
+    fontFamily: "Kavoon",
+    color: "black",
+    marginTop: 50,
+  },
   btn: {
     position: "absolute",
-    bottom: -150,
+    bottom: 50,
     width: 250,
     height: 80,
     backgroundColor: "white",
@@ -133,17 +148,31 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     alignSelf: "center",
   },
-  middleText: { fontFamily: "Kavoon", textAlign: "center" },
-  soundBtn: { padding: 10, backgroundColor: "white", borderRadius: 20,borderColor:'pink',borderWidth:1 },
   imageShadow: {
-    width: 80,
-    height: 80,
+    width: 120,
+    height: 120,
     marginTop: 30,
     shadowColor: "#000",
     shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
     elevation: 30,
-    borderRadius: 50,
+    borderRadius: 60,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  answerImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 40,
+  },
+  middleText: { fontFamily: "Kavoon", textAlign: "center" },
+  soundBtn: {
+    padding: 10,
+    backgroundColor: "white",
+    borderRadius: 20,
+    borderColor: "pink",
+    borderWidth: 1,
+    marginTop: 20,
   },
 });

@@ -4,7 +4,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 
 export default function CompleteScreen() {
   const router = useRouter();
-  const { score = "0", total = "10", category = "Animals" } = useLocalSearchParams<{
+  const { score = "0", total = "10", category } = useLocalSearchParams<{
     score?: string;
     total?: string;
     category?: string;

@@ -35,7 +35,7 @@ export default function QuestionScreen() {
 
   const currentIndex = Number(index);
   const currentScore = Number(score);
-
+  const TOTAL_QUESTIONS = 10;
   const [quizList, setQuizList] = useState<QuizItem[]>([]);
   const [question, setQuestion] = useState<QuizItem | null>(null);
   const [options, setOptions] = useState<QuizItem[]>([]);
@@ -134,8 +134,12 @@ export default function QuestionScreen() {
         style={styles.btn}
         disabled={!selected}
         onPress={() => {
-          const isCorrect = selected === question.image;
+          if (!question || !selected) return;
 
+          const isCorrect = selected === question.image;
+          const newScore = isCorrect ? currentScore + 1 : currentScore;
+          const nextIndex = currentIndex + 1;
+  const isLastQuestion = nextIndex > TOTAL_QUESTIONS - 1;
           router.replace({
             pathname: isCorrect ? "/correct" : "/incorrect",
             params: {
@@ -144,9 +148,11 @@ export default function QuestionScreen() {
               audio: question.audio,
               category,
               index: currentIndex.toString(),
-              score: isCorrect ? currentScore + 1 : currentScore,
+              score: newScore,
+              total: TOTAL_QUESTIONS.toString(), // pass total questions
             },
           });
+          
         }}
       >
         <Text style={[styles.middleText,{fontSize:30}]}>Comfirm</Text>
