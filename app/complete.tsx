@@ -1,9 +1,11 @@
 import { StyleSheet, ImageBackground, Text, View, Image, Pressable } from "react-native";
 import { useFonts } from "expo-font";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import { useQuizResult } from "../components/quizResultContext";
 
 export default function CompleteScreen() {
   const router = useRouter();
+    const { resetResults } = useQuizResult();
   const { score = "0", total = "10", category } = useLocalSearchParams<{
     score?: string;
     total?: string;
@@ -50,12 +52,18 @@ export default function CompleteScreen() {
         <Text style={[styles.score, { fontSize: 30, fontFamily: 'Margarine' }]}>out</Text>
         <Text style={[styles.score, { color: "yellow" }]}>{total}</Text>
       </View>
-
+<Pressable
+        onPress={() => router.push("/result")}
+        style={[styles.btn,{marginTop:10}]}
+      >
+        <Image style={styles.icon} source={require('../assets/images/search.png')}></Image>
+        <Text style={styles.middleText}>See Results</Text>
+      </Pressable>
       <Text style={{
         color: 'white',
         fontSize: 30,
         textAlign: 'center',
-        marginTop: 20,
+        marginTop: 40,
         fontWeight: 'bold',
         textShadowColor: "black",
         fontFamily: 'Kavoon',
@@ -69,7 +77,7 @@ export default function CompleteScreen() {
         color: 'white',
         fontSize: 30,
         textAlign: 'center',
-        marginTop: 50,
+        marginTop: 30,
         textShadowColor: "black",
         fontFamily: 'Kavoon',
         textShadowOffset: { width: 3, height: 3 },
@@ -82,7 +90,7 @@ export default function CompleteScreen() {
         color: 'white',
         fontSize: 25,
         textAlign: 'center',
-        marginTop: 70,
+        marginTop: 30,
         textShadowColor: "black",
         fontFamily: 'Kavoon',
         textShadowOffset: { width: 3, height: 3 },
@@ -97,6 +105,7 @@ export default function CompleteScreen() {
         <Pressable
           style={styles.btn}
           onPress={() => {
+            resetResults();
             router.replace({
               pathname: "/question",
               params: { category, index: "0", score: "0" },
@@ -110,7 +119,10 @@ export default function CompleteScreen() {
         {/* Exit */}
         <Pressable
           style={styles.btn}
-          onPress={() => router.back()}
+          onPress={() => {
+            resetResults();
+            router.back()
+          }}
         >
           <Image source={require("../assets/images/wave.png")} style={styles.icon} />
           <Text style={[styles.middleText, { color: "black", fontSize: 21 }]}>Exit</Text>
@@ -133,6 +145,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 50,
     alignSelf: "center",
+    elevation:20
   },
   cat_middleText: { fontSize: 35, color: "white", fontFamily: "Margarine", textShadowRadius: 8, textAlign: "center" },
   btn: {
@@ -148,8 +161,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 30,
     alignSelf: "center",
+    // Shadow (Android)
+    elevation:20
   },
-  icon: { width: 50, height: 50 },
+  icon: { width: 30, height: 30 },
   middleText: { fontSize: 20, color: "black", fontFamily: "Kavoon", textAlign: "center" },
   score: {
     color: "white",

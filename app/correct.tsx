@@ -133,11 +133,10 @@ const styles = StyleSheet.create({
     fontSize: 50,
     fontFamily: "Kavoon",
     color: "black",
-    marginTop: 50,
+    marginTop: 0,
   },
   btn: {
-    position: "absolute",
-    bottom: 50,
+    marginTop:60,
     width: 250,
     height: 80,
     backgroundColor: "white",
