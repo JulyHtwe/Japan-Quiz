@@ -24,9 +24,9 @@ export default function CompleteScreen() {
       source={require("../assets/images/bg_5.png")}
       style={styles.bgImage}
     >
-      <View style={[styles.complete_btn, { marginTop: "20%" }]}>
+      <View style={[styles.completeBtn, { marginTop: "20%" }]}>
         <Image style= {styles.icon} source={require('../assets/images/firework.png')}></Image>
-        <Text style={[styles.cat_middleText, { color: "black", fontSize: 30 }]}>
+        <Text style={[styles.catMiddleText, { color: "black", fontSize: 30 }]}>
           Quiz Complete
         </Text>
         <Image style= {styles.icon} source={require('../assets/images/firework.png')}></Image>
@@ -54,8 +54,14 @@ export default function CompleteScreen() {
       </View>
 <Pressable
         onPress={() => router.push("/result")}
-        style={[styles.btn,{marginTop:10}]}
-      >
+ style={({ pressed }) => [
+          styles.btn,
+          {
+            marginTop:10,
+            backgroundColor: pressed ? "#ffe6f0" : "white",
+            transform: [{ scale: pressed ? 0.97 : 1 }],
+          },
+        ]}      >
         <Image style={styles.icon} source={require('../assets/images/search.png')}></Image>
         <Text style={styles.middleText}>See Results</Text>
       </Pressable>
@@ -103,7 +109,13 @@ export default function CompleteScreen() {
       <View style={{ flexDirection: 'row', gap: 20, alignItems: 'center', justifyContent: 'center', marginTop: 30 }}>
         {/* Play Again */}
         <Pressable
-          style={styles.btn}
+           style={({ pressed }) => [
+          styles.btn,
+          {
+            backgroundColor: pressed ? "#ffe6f0" : "white",
+            transform: [{ scale: pressed ? 0.97 : 1 }],
+          },
+        ]}
           onPress={() => {
             resetResults();
             router.replace({
@@ -118,10 +130,17 @@ export default function CompleteScreen() {
 
         {/* Exit */}
         <Pressable
-          style={styles.btn}
+           style={({ pressed }) => [
+          styles.btn,
+          {
+            backgroundColor: pressed ? "#ffe6f0" : "white",
+            transform: [{ scale: pressed ? 0.97 : 1 }],
+          },
+        ]}
           onPress={() => {
             resetResults();
-            router.back()
+            // router.back()
+            router.replace("/categories");
           }}
         >
           <Image source={require("../assets/images/wave.png")} style={styles.icon} />
@@ -135,7 +154,7 @@ export default function CompleteScreen() {
 
 const styles = StyleSheet.create({
   bgImage: { flex: 1, width: "100%", height: "100%" },
-  complete_btn: {
+  completeBtn: {
     flexDirection: "row",
     gap: 10,
     width: 360,
@@ -147,11 +166,11 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     elevation:20
   },
-  cat_middleText: { fontSize: 35, color: "white", fontFamily: "Margarine", textShadowRadius: 8, textAlign: "center" },
+  catMiddleText: { fontSize: 35, color: "white", fontFamily: "Margarine", textShadowRadius: 8, textAlign: "center" },
   btn: {
     flexDirection: 'row',
     gap: 15,
-    marginTop: 60,
+    marginTop: 50,
     width: 180,
     height: 60,
     backgroundColor: "white",

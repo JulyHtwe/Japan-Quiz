@@ -39,6 +39,7 @@ export default function Results() {
   };
 
   return (
+    <View style={{backgroundColor:'black'}}>
     <ScrollView
       style={{ margin: 10 }}
       contentContainerStyle={styles.container}
@@ -51,7 +52,6 @@ export default function Results() {
             { borderColor: item.isCorrect ? "green" : "red" },
           ]}
         >
-          {/* Question + Audio */}
           <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
             <Text style={styles.question}>
               Q{index + 1}: {item.question}
@@ -64,8 +64,6 @@ export default function Results() {
               />
             </Pressable>
           </View>
-
-          {/* Options */}
           <View style={styles.options}>
             {item.options.map((opt) => {
               const isCorrect = opt === item.correctAnswer;
@@ -90,8 +88,6 @@ export default function Results() {
           </View>
         </View>
       ))}
-
-      {/* Back Button */}
       <Pressable style={styles.btn} onPress={() =>{
         // resetResults();
         router.back();
@@ -107,13 +103,14 @@ export default function Results() {
         />
       </Pressable>
     </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     paddingTop: 50,
-    paddingBottom: 50, // ✅ important for Back button
+    paddingBottom: 50, 
   },
 
   card: {

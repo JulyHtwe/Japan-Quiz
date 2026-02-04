@@ -140,7 +140,13 @@ export default function QuestionScreen() {
       </View>
 
       <Pressable
-        style={styles.btn}
+        style={({ pressed }) => [
+          styles.btn,
+          {
+            backgroundColor: pressed ? "#ffe6f0" : "white",
+            transform: [{ scale: pressed ? 0.97 : 1 }],
+          },
+        ]}
         disabled={!selected}
         onPress={() => {
           if (!question || !selected) return;
@@ -233,8 +239,9 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   btn: {
-    position: "absolute",
-    bottom: 70,
+    // position: "absolute",
+    // bottom: 70,
+    marginTop:50,
     width: 250,
     height: 80,
     backgroundColor: "white",

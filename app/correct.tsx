@@ -18,15 +18,14 @@ const IMAGE_BASE_URL =
 export default function Correct() {
   const router = useRouter();
 
-  const { name, image, audio, category, index, score } =
-    useLocalSearchParams<{
-      name: string;
-      image: string;
-      audio: string;
-      category: string;
-      index: string;
-      score: string;
-    }>();
+  const { name, image, audio, category, index, score } = useLocalSearchParams<{
+    name: string;
+    image: string;
+    audio: string;
+    category: string;
+    index: string;
+    score: string;
+  }>();
 
   const currentIndex = Number(index);
   const totalQuestions = 10;
@@ -73,7 +72,13 @@ export default function Correct() {
         </Pressable>
 
         <Pressable
-          style={styles.btn}
+          style={({ pressed }) => [
+            styles.btn,
+            {
+              backgroundColor: pressed ? "#ffe6f0" : "white",
+              transform: [{ scale: pressed ? 0.97 : 1 }],
+            },
+          ]}
           onPress={() => {
             if (isLastQuestion) {
               router.replace({
@@ -136,7 +141,7 @@ const styles = StyleSheet.create({
     marginTop: 0,
   },
   btn: {
-    marginTop:60,
+    marginTop: 60,
     width: 250,
     height: 80,
     backgroundColor: "white",
