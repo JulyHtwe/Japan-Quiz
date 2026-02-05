@@ -5,10 +5,19 @@ import {
   View,
   Image,
   Pressable,
+  BackHandler,
+  Dimensions,
 } from "react-native";
 import { useFonts } from "expo-font";
 import { Audio } from "expo-av";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect } from "react";
+
+const { width, height } = Dimensions.get("window");
+
+// Responsive helpers
+const wp = (percent: string) => (width * parseFloat(percent)) / 100;
+const hp = (percent: string) => (height * parseFloat(percent)) / 100;
 
 const AUDIO_BASE_URL =
   "https://raw.githubusercontent.com/JulyHtwe/japan_quiz/main/audio/";
@@ -18,14 +27,16 @@ const IMAGE_BASE_URL =
 export default function Correct() {
   const router = useRouter();
 
-  const { name, image, audio, category, index, score } = useLocalSearchParams<{
-    name: string;
-    image: string;
-    audio: string;
-    category: string;
-    index: string;
-    score: string;
-  }>();
+  const { name, romaji, image, audio, category, index, score } =
+    useLocalSearchParams<{
+      name: string;
+      romaji?: string;
+      image?: string;
+      audio?: string;
+      category: string;
+      index: string;
+      score: string;
+    }>();
 
   const currentIndex = Number(index);
   const totalQuestions = 10;
@@ -36,11 +47,26 @@ export default function Correct() {
     Margarine: require("../assets/fonts/Margarine-Regular.ttf"),
   });
 
+  // Disable Android back button
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => true
+    );
+    return () => backHandler.remove();
+  }, []);
+
+  // Audio safe play
   const playAudio = async () => {
-    const { sound } = await Audio.Sound.createAsync({
-      uri: AUDIO_BASE_URL + audio,
-    });
-    await sound.playAsync();
+    if (!audio) return;
+    try {
+      const { sound } = await Audio.Sound.createAsync({
+        uri: AUDIO_BASE_URL + audio,
+      });
+      await sound.playAsync();
+    } catch (err) {
+      console.log("Audio error:", err);
+    }
   };
 
   if (!fontLoaded) return null;
@@ -55,22 +81,31 @@ export default function Correct() {
           style={styles.icon}
           source={require("../assets/images/check.png")}
         />
+
         <Text style={styles.title}>Correct</Text>
         <Text style={styles.subtitle}>The correct answer is:</Text>
 
-        <View style={styles.imageShadow}>
-          <Image
-            source={{ uri: IMAGE_BASE_URL + image }}
-            style={styles.answerImage}
-          />
-        </View>
+        {/* Image OR romaji */}
+        {image ? (
+          <View style={styles.imageShadow}>
+            <Image
+              source={{ uri: IMAGE_BASE_URL + image }}
+              style={styles.answerImage}
+            />
+          </View>
+        ) : (
+          <Text style={styles.correctText}>{romaji}</Text>
+        )}
 
-        <Text style={styles.correctText}>{name}</Text>
+        {/* Name always */}
+        {name && <Text style={styles.correctText}>{name}</Text>}
 
+        {/* Audio button */}
         <Pressable style={styles.soundBtn} onPress={playAudio}>
           <Text style={styles.middleText}>🔊 Hear it!</Text>
         </Pressable>
 
+        {/* Next button */}
         <Pressable
           style={({ pressed }) => [
             styles.btn,
@@ -97,8 +132,8 @@ export default function Correct() {
             }
           }}
         >
-          <Text style={[styles.middleText, { fontSize: 30 }]}>
-            {isLastQuestion ? "Complete Quiz" : "Next Word"}
+          <Text style={styles.btnText}>
+            {isLastQuestion ? "Complete" : "Next Word"}
           </Text>
         </Pressable>
       </View>
@@ -107,76 +142,98 @@ export default function Correct() {
 }
 
 const styles = StyleSheet.create({
-  bgImage: { flex: 1, width: "100%", height: "100%" },
+  bgImage: {
+    flex: 1,
+    width: wp("100%"),
+    height: hp("100%"),
+  },
+
   container: {
-    top: 70,
-    gap: 15,
+    top: hp("10%"),
+    gap: hp("2%"),
     justifyContent: "center",
     alignItems: "center",
   },
+
   icon: {
-    width: 80,
-    height: 80,
+    width: wp("20%"),
+    height: wp("20%"),
+    borderRadius: wp("10%"),
     elevation: 10,
-    borderRadius: 40,
   },
+
   title: {
-    fontSize: 50,
+    fontSize: wp("12%"),
     fontFamily: "Kavoon",
     color: "black",
     textShadowColor: "white",
     textShadowOffset: { width: 3, height: 3 },
     textShadowRadius: 10,
   },
+
   subtitle: {
-    fontSize: 20,
+    fontSize: wp("4.5%"),
     fontFamily: "Kavoon",
     color: "black",
-    marginTop: 30,
+    marginTop: hp("2%"),
   },
+
   correctText: {
-    fontSize: 50,
+    fontSize: wp("10%"),
     fontFamily: "Kavoon",
     color: "black",
-    marginTop: 0,
+    marginTop: hp("1%"),
   },
+
   btn: {
-    marginTop: 60,
-    width: 250,
-    height: 80,
+    marginTop: hp("6%"),
+    width: wp("60%"),
+    height: hp("8%"),
     backgroundColor: "white",
     borderColor: "pink",
     borderWidth: 5,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 50,
-    alignSelf: "center",
+    borderRadius: wp("12%"),
   },
+
+  btnText: {
+    fontSize: hp("4%"),
+    fontFamily: "Kavoon",
+  },
+
   imageShadow: {
-    width: 120,
-    height: 120,
-    marginTop: 30,
+    width: wp("30%"),
+    height: wp("30%"),
+    marginTop: hp("3%"),
     shadowColor: "#000",
     shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
     elevation: 30,
-    borderRadius: 60,
+    borderRadius: wp("15%"),
     justifyContent: "center",
     alignItems: "center",
   },
+
   answerImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 40,
+    width: wp("25%"),
+    height: wp("25%"),
+    borderRadius: wp("10%"),
   },
-  middleText: { fontFamily: "Kavoon", textAlign: "center" },
+
+  middleText: {
+    fontFamily: "Kavoon",
+    textAlign: "center",
+    fontSize: hp("2%"),
+  },
+
   soundBtn: {
-    padding: 10,
+    padding: hp("1%"),
     backgroundColor: "white",
-    borderRadius: 20,
+    borderRadius: wp("5%"),
     borderColor: "pink",
     borderWidth: 1,
-    marginTop: 20,
+    marginTop: hp("2%"),
   },
 });

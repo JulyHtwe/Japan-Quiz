@@ -1,16 +1,53 @@
-import { StyleSheet, ImageBackground, Text, View, Image, Pressable } from "react-native";
+import {
+  StyleSheet,
+  ImageBackground,
+  Text,
+  View,
+  Image,
+  Pressable,
+  Dimensions,
+  PixelRatio
+} from "react-native";
 import { useFonts } from "expo-font";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useQuizResult } from "../components/quizResultContext";
 
+/* ---------- Responsive Helpers ---------- */
+
+const { width, height } = Dimensions.get("window");
+
+const BASE_WIDTH = 375;
+const BASE_HEIGHT = 812;
+
+const scale = (size: number) => (width / BASE_WIDTH) * size;
+const verticalScale = (size: number) =>
+  (height / BASE_HEIGHT) * size;
+export const scaleFont = (size: number) => {
+  const scale = width / BASE_WIDTH;
+
+  // reduce font slightly on small phones
+  const adjusted =
+    width < 350
+      ? scale * 0.85
+      : width < 400
+      ? scale * 0.95
+      : scale;
+
+  return Math.round(PixelRatio.roundToNearestPixel(size * adjusted));
+};
+
+/* ======================================= */
+
 export default function CompleteScreen() {
   const router = useRouter();
-    const { resetResults } = useQuizResult();
-  const { score = "0", total = "10", category } = useLocalSearchParams<{
-    score?: string;
-    total?: string;
-    category?: string;
-  }>();
+  const { resetResults } = useQuizResult();
+
+  const { score = "0", total = "10", category } =
+    useLocalSearchParams<{
+      score?: string;
+      total?: string;
+      category?: string;
+    }>();
 
   const [fontLoaded] = useFonts({
     Kavoon: require("../assets/fonts/Kavoon-Regular.ttf"),
@@ -24,174 +61,274 @@ export default function CompleteScreen() {
       source={require("../assets/images/bg_5.png")}
       style={styles.bgImage}
     >
-      <View style={[styles.completeBtn, { marginTop: "20%" }]}>
-        <Image style= {styles.icon} source={require('../assets/images/firework.png')}></Image>
-        <Text style={[styles.catMiddleText, { color: "black", fontSize: 30 }]}>
+      {/* Title */}
+      <View
+        style={[
+          styles.completeBtn,
+          { marginTop: verticalScale(60) },
+        ]}
+      >
+        <Image
+          style={styles.icon}
+          source={require("../assets/images/firework.png")}
+        />
+
+        <Text
+          style={[
+            styles.catMiddleText,
+            { fontSize: scaleFont(30), color: "black" },
+          ]}
+        >
           Quiz Complete
         </Text>
-        <Image style= {styles.icon} source={require('../assets/images/firework.png')}></Image>
+
+        <Image
+          style={styles.icon}
+          source={require("../assets/images/firework.png")}
+        />
       </View>
 
-      <Text style={{
-        color: 'white',
-        fontSize: 40,
-        textAlign: 'center',
-        marginTop: 20,
-        fontWeight: 'bold',
-        paddingTop: 10,
-        textShadowColor: "black",
-        textShadowOffset: { width: 3, height: 3 },
-        textShadowRadius: 7,
-      }}>
-        You got
-      </Text>
+      {/* Score Text */}
+      <Text style={styles.youGot}>You got</Text>
 
       {/* Score */}
-      <View style={{ flexDirection: 'row', gap: 40, width: '100%', alignItems: "center", justifyContent: 'center' }}>
-        <Text style={[styles.score, { color: "yellow" }]}>{score}</Text>
-        <Text style={[styles.score, { fontSize: 30, fontFamily: 'Margarine' }]}>out</Text>
-        <Text style={[styles.score, { color: "yellow" }]}>{total}</Text>
+      <View style={styles.scoreRow}>
+        <Text style={[styles.score, { color: "yellow" }]}>
+          {score}
+        </Text>
+
+        <Text
+          style={[
+            styles.score,
+            { fontSize: scaleFont(30), fontFamily: "Margarine" },
+          ]}
+        >
+          out
+        </Text>
+
+        <Text style={[styles.score, { color: "yellow" }]}>
+          {total}
+        </Text>
       </View>
-<Pressable
+
+      {/* Results Button */}
+      <Pressable
         onPress={() => router.push("/result")}
- style={({ pressed }) => [
+        style={({ pressed }) => [
           styles.btn,
           {
-            marginTop:10,
-            backgroundColor: pressed ? "#ffe6f0" : "white",
-            transform: [{ scale: pressed ? 0.97 : 1 }],
-          },
-        ]}      >
-        <Image style={styles.icon} source={require('../assets/images/search.png')}></Image>
-        <Text style={styles.middleText}>See Results</Text>
-      </Pressable>
-      <Text style={{
-        color: 'white',
-        fontSize: 30,
-        textAlign: 'center',
-        marginTop: 40,
-        fontWeight: 'bold',
-        textShadowColor: "black",
-        fontFamily: 'Kavoon',
-        textShadowOffset: { width: 3, height: 3 },
-        textShadowRadius: 7,
-      }}>
-        Great Job!
-      </Text>
-
-      <Text style={{
-        color: 'white',
-        fontSize: 30,
-        textAlign: 'center',
-        marginTop: 30,
-        textShadowColor: "black",
-        fontFamily: 'Kavoon',
-        textShadowOffset: { width: 3, height: 3 },
-        textShadowRadius: 7,
-      }}>
-        Japanese is proud of you!
-      </Text>
-
-      <Text style={{
-        color: 'white',
-        fontSize: 25,
-        textAlign: 'center',
-        marginTop: 30,
-        textShadowColor: "black",
-        fontFamily: 'Kavoon',
-        textShadowOffset: { width: 3, height: 3 },
-        textShadowRadius: 7,
-      }}>
-        Practice makes perfect!
-      </Text>
-
-      {/* Buttons */}
-      <View style={{ flexDirection: 'row', gap: 20, alignItems: 'center', justifyContent: 'center', marginTop: 30 }}>
-        {/* Play Again */}
-        <Pressable
-           style={({ pressed }) => [
-          styles.btn,
-          {
-            backgroundColor: pressed ? "#ffe6f0" : "white",
+            marginTop: verticalScale(10),
+            backgroundColor: pressed
+              ? "#ffe6f0"
+              : "white",
             transform: [{ scale: pressed ? 0.97 : 1 }],
           },
         ]}
+      >
+        <Image
+          style={styles.icon}
+          source={require("../assets/images/search.png")}
+        />
+        <Text style={styles.middleText}>See Results</Text>
+      </Pressable>
+
+      <Text style={styles.greatJob}>Great Job!</Text>
+
+      <Text style={styles.proudText}>
+        Japanese is proud of you!
+      </Text>
+
+      <Text style={styles.practiceText}>
+        Practice makes perfect!
+      </Text>
+
+      {/* Buttons Row */}
+      <View style={styles.bottomBtns}>
+        {/* Play Again */}
+        <Pressable
+          style={({ pressed }) => [
+            styles.btn,
+            {
+              backgroundColor: pressed
+                ? "#ffe6f0"
+                : "white",
+              transform: [{ scale: pressed ? 0.97 : 1 }],
+            },
+          ]}
           onPress={() => {
             resetResults();
             router.replace({
               pathname: "/question",
-              params: { category, index: "0", score: "0" },
+              params: {
+                category,
+                index: "0",
+                score: "0",
+              },
             });
           }}
         >
-          <Image source={require("../assets/images/refresh.png")} style={[styles.icon, { width: 40, height: 40 }]} />
-          <Text style={[styles.middleText, { color: "black", fontSize: 21 }]}>Play Again</Text>
+          <Image
+            source={require("../assets/images/refresh.png")}
+            style={[
+              styles.icon,
+              { width: scale(40), height: scale(40) },
+            ]}
+          />
+
+          <Text style={styles.middleText}>
+            Play Again
+          </Text>
         </Pressable>
 
         {/* Exit */}
         <Pressable
-           style={({ pressed }) => [
-          styles.btn,
-          {
-            backgroundColor: pressed ? "#ffe6f0" : "white",
-            transform: [{ scale: pressed ? 0.97 : 1 }],
-          },
-        ]}
+          style={({ pressed }) => [
+            styles.btn,
+            {
+              backgroundColor: pressed
+                ? "#ffe6f0"
+                : "white",
+              transform: [{ scale: pressed ? 0.97 : 1 }],
+            },
+          ]}
           onPress={() => {
             resetResults();
-            // router.back()
             router.replace("/categories");
           }}
         >
-          <Image source={require("../assets/images/wave.png")} style={styles.icon} />
-          <Text style={[styles.middleText, { color: "black", fontSize: 21 }]}>Exit</Text>
-          <Image source={require("../assets/images/wave.png")} style={styles.icon} />
+          <Image
+            source={require("../assets/images/wave.png")}
+            style={styles.icon}
+          />
+
+          <Text style={styles.middleText}>Exit</Text>
+
+          <Image
+            source={require("../assets/images/wave.png")}
+            style={styles.icon}
+          />
         </Pressable>
       </View>
     </ImageBackground>
   );
 }
 
+/* ---------- Styles ---------- */
+
 const styles = StyleSheet.create({
-  bgImage: { flex: 1, width: "100%", height: "100%" },
+  bgImage: { flex: 1 },
+
   completeBtn: {
     flexDirection: "row",
-    gap: 10,
-    width: 360,
-    height: 100,
+    gap: scale(10),
+    width: scale(360),
+    height: verticalScale(100),
     backgroundColor: "white",
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 50,
+    borderRadius: scale(50),
     alignSelf: "center",
-    elevation:20
+    elevation: 20,
   },
-  catMiddleText: { fontSize: 35, color: "white", fontFamily: "Margarine", textShadowRadius: 8, textAlign: "center" },
+
+  catMiddleText: {
+    fontFamily: "Margarine",
+    textAlign: "center",
+  },
+
+  icon: {
+    width: scale(30),
+    height: scale(30),
+  },
+
   btn: {
-    flexDirection: 'row',
-    gap: 15,
-    marginTop: 50,
-    width: 180,
-    height: 60,
+    flexDirection: "row",
+    gap: scale(15),
+    width: scale(180),
+    height: verticalScale(60),
     backgroundColor: "white",
     borderColor: "pink",
     borderWidth: 5,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 30,
+    borderRadius: scale(30),
     alignSelf: "center",
-    // Shadow (Android)
-    elevation:20
+    elevation: 20,
   },
-  icon: { width: 30, height: 30 },
-  middleText: { fontSize: 20, color: "black", fontFamily: "Kavoon", textAlign: "center" },
+
+  middleText: {
+    fontSize: scaleFont(20),
+    color: "black",
+    fontFamily: "Kavoon",
+    textAlign: "center",
+  },
+
   score: {
-    color: "white",
-    fontSize: 80,
+    fontSize: scaleFont(80),
     textAlign: "center",
     fontFamily: "Kavoon",
     textShadowColor: "black",
     textShadowOffset: { width: 3, height: 3 },
     textShadowRadius: 7,
+  },
+
+  scoreRow: {
+    flexDirection: "row",
+    gap: scale(40),
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: verticalScale(20),
+  },
+
+  youGot: {
+    color: "white",
+    fontSize: scaleFont(40),
+    textAlign: "center",
+    marginTop: verticalScale(20),
+    fontWeight: "bold",
+    textShadowColor: "black",
+    textShadowOffset: { width: 3, height: 3 },
+    textShadowRadius: 7,
+  },
+
+  greatJob: {
+    color: "white",
+    fontSize: scaleFont(30),
+    textAlign: "center",
+    marginTop: verticalScale(40),
+    fontFamily: "Kavoon",
+    textShadowColor: "black",
+    textShadowOffset: { width: 3, height: 3 },
+    textShadowRadius: 7,
+  },
+
+  proudText: {
+    color: "white",
+    fontSize: scaleFont(30),
+    textAlign: "center",
+    marginTop: verticalScale(30),
+    fontFamily: "Kavoon",
+    textShadowColor: "black",
+    textShadowOffset: { width: 3, height: 3 },
+    textShadowRadius: 7,
+  },
+
+  practiceText: {
+    color: "white",
+    fontSize: scaleFont(25),
+    textAlign: "center",
+    marginTop: verticalScale(30),
+    fontFamily: "Kavoon",
+    textShadowColor: "black",
+    textShadowOffset: { width: 3, height: 3 },
+    textShadowRadius: 7,
+  },
+
+  bottomBtns: {
+    flexDirection: "row",
+    gap: scale(20),
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: verticalScale(30),
   },
 });
