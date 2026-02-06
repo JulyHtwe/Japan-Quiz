@@ -9,123 +9,115 @@ import {
   SafeAreaView,
 } from "react-native";
 import { useFonts } from "expo-font";
-import { useEffect, useState } from "react";
+import { Audio } from "expo-av";
 import { useRouter } from "expo-router";
-
-const JSON_URL =
-  "https://raw.githubusercontent.com/JulyHtwe/japan_quiz/main/hiragana.json";
-type HiraganaItem = {
-  hiragana: string;
-  romaji: string;
-  audio?: string;
-};
 
 const { width, height } = Dimensions.get("window");
 const numColumns = 5;
-const cardSize = Math.min(width / numColumns - 16, 80); // Responsive card size
+const cardSize = Math.min(width / numColumns - 16, 80);
 const isSmallDevice = height < 365;
 const isLargeDevice = width > 768;
 
+// 🔹 Static grid data with audio
+const gridData = [
+  [
+    { hiragana: "あ", romaji: "a", audio: require("../assets/audio/あ.mp3") },
+    { hiragana: "い", romaji: "i", audio: require("../assets/audio/い.mp3") },
+    { hiragana: "う", romaji: "u", audio: require("../assets/audio/う.mp3") },
+    { hiragana: "え", romaji: "e", audio: require("../assets/audio/え.mp3") },
+    { hiragana: "お", romaji: "o", audio: require("../assets/audio/お.mp3") },
+  ],
+  [
+    { hiragana: "か", romaji: "ka", audio: require("../assets/audio/か.mp3") },
+    { hiragana: "き", romaji: "ki", audio: require("../assets/audio/き.mp3") },
+    { hiragana: "く", romaji: "ku", audio: require("../assets/audio/く.mp3") },
+    { hiragana: "け", romaji: "ke", audio: require("../assets/audio/け.mp3") },
+    { hiragana: "こ", romaji: "ko", audio: require("../assets/audio/こ.mp3") },
+  ],
+  [
+    { hiragana: "さ", romaji: "sa", audio: require("../assets/audio/さ.mp3") },
+    { hiragana: "し", romaji: "shi", audio: require("../assets/audio/し.mp3") },
+    { hiragana: "す", romaji: "su", audio: require("../assets/audio/す.mp3") },
+    { hiragana: "せ", romaji: "se", audio: require("../assets/audio/せ.mp3") },
+    { hiragana: "そ", romaji: "so", audio: require("../assets/audio/そ.mp3") },
+  ],
+  [
+    { hiragana: "た", romaji: "ta", audio: require("../assets/audio/た.mp3") },
+    { hiragana: "ち", romaji: "chi", audio: require("../assets/audio/ち.mp3") },
+    { hiragana: "つ", romaji: "tsu", audio: require("../assets/audio/つ.mp3") },
+    { hiragana: "て", romaji: "te", audio: require("../assets/audio/て.mp3") },
+    { hiragana: "と", romaji: "to", audio: require("../assets/audio/と.mp3") },
+  ],
+  [
+    { hiragana: "な", romaji: "na", audio: require("../assets/audio/な.mp3") },
+    { hiragana: "に", romaji: "ni", audio: require("../assets/audio/に.mp3") },
+    { hiragana: "ぬ", romaji: "nu", audio: require("../assets/audio/ぬ.mp3") },
+    { hiragana: "ね", romaji: "ne", audio: require("../assets/audio/ね.mp3") },
+    { hiragana: "の", romaji: "no", audio: require("../assets/audio/の.mp3") },
+  ],
+  [
+    { hiragana: "は", romaji: "ha", audio: require("../assets/audio/は.mp3") },
+    { hiragana: "ひ", romaji: "hi", audio: require("../assets/audio/ひ.mp3") },
+    { hiragana: "ふ", romaji: "fu", audio: require("../assets/audio/ふ.mp3") },
+    { hiragana: "へ", romaji: "he", audio: require("../assets/audio/へ.mp3") },
+    { hiragana: "ほ", romaji: "ho", audio: require("../assets/audio/ほ.mp3") },
+  ],
+  [
+    { hiragana: "ま", romaji: "ma", audio: require("../assets/audio/ま.mp3") },
+    { hiragana: "み", romaji: "mi", audio: require("../assets/audio/み.mp3") },
+    { hiragana: "む", romaji: "mu", audio: require("../assets/audio/む.mp3") },
+    { hiragana: "め", romaji: "me", audio: require("../assets/audio/め.mp3") },
+    { hiragana: "も", romaji: "mo", audio: require("../assets/audio/も.mp3") },
+  ],
+  [
+    { hiragana: "や", romaji: "ya", audio: require("../assets/audio/や.mp3") },
+    { hiragana: "", romaji: "", audio: undefined },
+    { hiragana: "ゆ", romaji: "yu", audio: require("../assets/audio/ゆ.mp3") },
+    { hiragana: "", romaji: "", audio: undefined },
+    { hiragana: "よ", romaji: "yo", audio: require("../assets/audio/よ.mp3") },
+  ],
+  [
+    { hiragana: "ら", romaji: "ra", audio: require("../assets/audio/ら.mp3") },
+    { hiragana: "り", romaji: "ri", audio: require("../assets/audio/り.mp3") },
+    { hiragana: "る", romaji: "ru", audio: require("../assets/audio/る.mp3") },
+    { hiragana: "れ", romaji: "re", audio: require("../assets/audio/れ.mp3") },
+    { hiragana: "ろ", romaji: "ro", audio: require("../assets/audio/ろ.mp3") },
+  ],
+  [
+    { hiragana: "わ", romaji: "wa", audio: require("../assets/audio/わ.mp3") },
+    { hiragana: "", romaji: "", audio: undefined },
+    { hiragana: "", romaji: "", audio: undefined },
+    { hiragana: "", romaji: "", audio: undefined },
+    { hiragana: "を", romaji: "wo", audio: require("../assets/audio/を.mp3") },
+  ],
+  [
+    { hiragana: "", romaji: "", audio: undefined },
+    { hiragana: "", romaji: "", audio: undefined },
+    { hiragana: "", romaji: "", audio: undefined },
+    { hiragana: "", romaji: "", audio: undefined },
+    { hiragana: "ん", romaji: "n", audio: require("../assets/audio/ん.mp3") },
+  ],
+];
+
 export default function HiraganaScreen() {
   const router = useRouter();
-  const [hiraganaData, setHiraganaData] = useState<HiraganaItem[]>([]);
   const [fontLoaded] = useFonts({
     Kavoon: require("../assets/fonts/Kavoon-Regular.ttf"),
     Margarine: require("../assets/fonts/Margarine-Regular.ttf"),
   });
 
-  useEffect(() => {
-    fetch(JSON_URL)
-      .then((res) => res.json())
-      .then((data: HiraganaItem[]) => {
-        setHiraganaData(data);
-      })
-      .catch((error) => {
-        console.log("Error fetching data, using static structure:", error);
-      });
-  }, []);
-
   if (!fontLoaded) return null;
 
-  const gridData = [
-    [
-      { hiragana: "あ", romaji: "a" },
-      { hiragana: "い", romaji: "i" },
-      { hiragana: "う", romaji: "u" },
-      { hiragana: "え", romaji: "e" },
-      { hiragana: "お", romaji: "o" },
-    ],
-    [
-      { hiragana: "か", romaji: "ka" },
-      { hiragana: "き", romaji: "ki" },
-      { hiragana: "く", romaji: "ku" },
-      { hiragana: "け", romaji: "ke" },
-      { hiragana: "こ", romaji: "ko" },
-    ],
-    [
-      { hiragana: "さ", romaji: "sa" },
-      { hiragana: "し", romaji: "shi" },
-      { hiragana: "す", romaji: "su" },
-      { hiragana: "せ", romaji: "se" },
-      { hiragana: "そ", romaji: "so" },
-    ],
-    [
-      { hiragana: "た", romaji: "ta" },
-      { hiragana: "ち", romaji: "chi" },
-      { hiragana: "つ", romaji: "tsu" },
-      { hiragana: "て", romaji: "te" },
-      { hiragana: "と", romaji: "to" },
-    ],
-    [
-      { hiragana: "な", romaji: "na" },
-      { hiragana: "に", romaji: "ni" },
-      { hiragana: "ぬ", romaji: "nu" },
-      { hiragana: "ね", romaji: "ne" },
-      { hiragana: "の", romaji: "no" },
-    ],
-    [
-      { hiragana: "は", romaji: "ha" },
-      { hiragana: "ひ", romaji: "hi" },
-      { hiragana: "ふ", romaji: "fu" },
-      { hiragana: "へ", romaji: "he" },
-      { hiragana: "ほ", romaji: "ho" },
-    ],
-    [
-      { hiragana: "ま", romaji: "ma" },
-      { hiragana: "み", romaji: "mi" },
-      { hiragana: "む", romaji: "mu" },
-      { hiragana: "め", romaji: "me" },
-      { hiragana: "も", romaji: "mo" },
-    ],
-    [
-      { hiragana: "や", romaji: "ya" },
-      { hiragana: "", romaji: "" },
-      { hiragana: "ゆ", romaji: "yu" },
-      { hiragana: "", romaji: "" },
-      { hiragana: "よ", romaji: "yo" },
-    ],
-    [
-      { hiragana: "ら", romaji: "ra" },
-      { hiragana: "り", romaji: "ri" },
-      { hiragana: "る", romaji: "ru" },
-      { hiragana: "れ", romaji: "re" },
-      { hiragana: "ろ", romaji: "ro" },
-    ],
-    [
-      { hiragana: "わ", romaji: "wa" },
-      { hiragana: "", romaji: "" },
-      { hiragana: "", romaji: "" },
-      { hiragana: "", romaji: "" },
-      { hiragana: "を", romaji: "wo" },
-    ],
-    [
-      { hiragana: "", romaji: "" },
-      { hiragana: "", romaji: "" },
-      { hiragana: "", romaji: "" },
-      { hiragana: "", romaji: "" },
-      { hiragana: "ん", romaji: "n" },
-    ],
-  ];
+  const playAudio = async (audio?: any) => {
+    if (!audio) return;
+    try {
+      const { sound } = await Audio.Sound.createAsync(audio);
+      await sound.playAsync();
+      setTimeout(() => sound.unloadAsync(), 3000);
+    } catch (error) {
+      console.log("Error playing audio:", error);
+    }
+  };
 
   const startQuiz = () => {
     router.push("/question?category=Hiragana&index=0&score=0");
@@ -157,26 +149,22 @@ export default function HiraganaScreen() {
           <View style={styles.gridContainer}>
             {gridData.map((row, rowIndex) => (
               <View key={`row-${rowIndex}`} style={styles.row}>
-                {row.map((item, colIndex) => {
-                  const key = `cell-${rowIndex}-${colIndex}`;
-
-                  if (!item.hiragana) {
-                    return (
-                      <View key={key} style={[styles.card, styles.emptyCard]} />
-                    );
-                  }
-
-                  return (
-                    <View key={key} style={styles.card}>
-                      <Text style={styles.hiraganaText}>{item.hiragana}</Text>
-                      <Text style={styles.romajiText}>{item.romaji}</Text>
-                    </View>
-                  );
-                })}
+                {row.map((item, colIndex) => (
+                  <Pressable
+                    key={`cell-${rowIndex}-${colIndex}`}
+                    onPress={() => playAudio(item.audio)}
+                    style={({ pressed }) => [
+                      styles.card,
+                      pressed && { transform: [{ scale: 0.95 }] },
+                    ]}
+                  >
+                    <Text style={styles.hiraganaText}>{item.hiragana}</Text>
+                    <Text style={styles.romajiText}>{item.romaji}</Text>
+                  </Pressable>
+                ))}
               </View>
             ))}
           </View>
-
           <View style={styles.bottomSpacing} />
         </ScrollView>
       </ImageBackground>
@@ -185,17 +173,9 @@ export default function HiraganaScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  backgroundImage: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-  },
+  safeArea: { flex: 1, backgroundColor: "#fff" },
+  backgroundImage: { flex: 1, width: "100%", height: "100%" },
   scrollContent: {
-    
     flexGrow: 1,
     paddingVertical: isSmallDevice ? 16 : 24,
     paddingHorizontal: isLargeDevice ? 32 : 16,
@@ -248,11 +228,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
   },
-  row: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginVertical: isSmallDevice ? 2 : 4,
-  },
+  row: { flexDirection: "row", justifyContent: "center", marginVertical: isSmallDevice ? 2 : 4 },
   card: {
     width: cardSize,
     height: cardSize,
@@ -267,11 +243,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 3,
   },
-  emptyCard: {
-    backgroundColor: "transparent",
-    elevation: 0,
-    shadowOpacity: 0,
-  },
   hiraganaText: {
     fontSize: isLargeDevice ? 32 : isSmallDevice ? 24 : 28,
     fontFamily: "Kavoon",
@@ -285,7 +256,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
     letterSpacing: 0.5,
   },
-  bottomSpacing: {
-    height: isSmallDevice ? 30 : 50,
-  },
+  emptyCard: { backgroundColor: "transparent", elevation: 0, shadowOpacity: 0 },
+  bottomSpacing: { height: isSmallDevice ? 30 : 50 },
 });
