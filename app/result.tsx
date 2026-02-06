@@ -39,70 +39,81 @@ export default function Results() {
   };
 
   return (
-    <View style={{backgroundColor:'black'}}>
-    <ScrollView
-      style={{ margin: 10 }}
-      contentContainerStyle={styles.container}
-    >
-      {results.map((item, index) => (
-        <View
-          key={index}
-          style={[
-            styles.card,
-            { borderColor: item.isCorrect ? "green" : "red" },
-          ]}
+    <View style={{ backgroundColor: "black" }}>
+      <ScrollView
+        style={{ margin: 10 }}
+        contentContainerStyle={styles.container}
+      >
+        {results.map((item, index) => (
+          <View
+            key={index}
+            style={[
+              styles.card,
+              { borderColor: item.isCorrect ? "green" : "red" },
+            ]}
+          >
+            <View
+              style={{ flexDirection: "row", gap: 10, alignItems: "center" }}
+            >
+              <Text style={styles.question}>
+                Q{index + 1}: {item.question}
+              </Text>
+
+              <Pressable onPress={() => playAudio(item.correctAudio)}>
+                <Image
+                  style={styles.icon}
+                  source={require("../assets/images/volume.png")}
+                />
+              </Pressable>
+            </View>
+            <View style={styles.options}>
+              {item.options.map((opt) => {
+                const isCorrect = opt === item.correctAnswer;
+                const isSelected = opt === item.selectedAnswer;
+
+                return (
+                  <View
+                    key={opt}
+                    style={[
+                      styles.optionWrapper,
+                      isCorrect && styles.correct,
+                      isSelected && !isCorrect && styles.wrong,
+                    ]}
+                  >
+                    {opt.endsWith(".png") || opt.endsWith(".jpg") ? (
+                      <Image
+                        source={{ uri: IMAGE_BASE_URL + opt }}
+                        style={styles.image}
+                      />
+                    ) : (
+                      <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+                        {opt}
+                      </Text>
+                    )}
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+        ))}
+        <Pressable
+          style={styles.btn}
+          onPress={() => {
+            // resetResults();
+            router.back();
+          }}
         >
-          <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
-            <Text style={styles.question}>
-              Q{index + 1}: {item.question}
-            </Text>
-
-            <Pressable onPress={() => playAudio(item.correctAudio)}>
-              <Image
-                style={styles.icon}
-                source={require("../assets/images/volume.png")}
-              />
-            </Pressable>
-          </View>
-          <View style={styles.options}>
-            {item.options.map((opt) => {
-              const isCorrect = opt === item.correctAnswer;
-              const isSelected = opt === item.selectedAnswer;
-
-              return (
-                <View
-                  key={opt}
-                  style={[
-                    styles.optionWrapper,
-                    isCorrect && styles.correct,
-                    isSelected && !isCorrect && styles.wrong,
-                  ]}
-                >
-                  <Image
-                    source={{ uri: IMAGE_BASE_URL + opt }}
-                    style={styles.image}
-                  />
-                </View>
-              );
-            })}
-          </View>
-        </View>
-      ))}
-      <Pressable style={styles.btn} onPress={() =>{
-        // resetResults();
-        router.back();
-         }}>
-        <Image
-          source={require("../assets/images/wave.png")}
-          style={styles.icon}
-        />
-        <Text style={[styles.middleText, { fontSize: 21 }]}>Back</Text>
-        <Image
-          source={require("../assets/images/wave.png")}
-          style={styles.icon}
-        />
-      </Pressable>
-    </ScrollView>
+          <Image
+            source={require("../assets/images/wave.png")}
+            style={styles.icon}
+          />
+          <Text style={[styles.middleText, { fontSize: 21 }]}>Back</Text>
+          <Image
+            source={require("../assets/images/wave.png")}
+            style={styles.icon}
+          />
+        </Pressable>
+      </ScrollView>
     </View>
   );
 }
@@ -110,7 +121,7 @@ export default function Results() {
 const styles = StyleSheet.create({
   container: {
     paddingTop: 50,
-    paddingBottom: 50, 
+    paddingBottom: 50,
   },
 
   card: {

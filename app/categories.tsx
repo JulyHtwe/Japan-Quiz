@@ -42,9 +42,9 @@ export default function CategoriesScreen() {
       <Pressable
         onPress={() => setSelected(item.name)}
         style={({ pressed }) => [
-          styles.cat_btn,
-          isSmallScreen && styles.cat_btnSmall,
-          isTablet && styles.cat_btnTablet,
+          styles.catBtn,
+          isSmallScreen && styles.catBtnSmall,
+          isTablet && styles.catBtnTablet,
           {
             borderWidth: wp("1%"),
             borderColor: isSelected ? "pink" : "white",
@@ -66,16 +66,16 @@ export default function CategoriesScreen() {
         <Image
           source={item.image}
           style={[
-            styles.cate_png,
-            isSmallScreen && styles.cate_pngSmall,
-            isTablet && styles.cate_pngTablet,
+            styles.catePng,
+            isSmallScreen && styles.catePngSmall,
+            isTablet && styles.catePngTablet,
           ]}
         />
         <Text
           style={[
-            styles.cat_middleText,
-            isSmallScreen && styles.cat_middleTextSmall,
-            isTablet && styles.cat_middleTextTablet,
+            styles.catMiddleText,
+            isSmallScreen && styles.catMiddleTextSmall,
+            isTablet && styles.catMiddleTextTablet,
           ]}
         >
           {item.name}
@@ -153,7 +153,6 @@ export default function CategoriesScreen() {
   );
 }
 
-
 const styles = StyleSheet.create({
   bgImage: {
     flex: 1,
@@ -194,7 +193,7 @@ const styles = StyleSheet.create({
     gap: wp("6%"),
     marginTop: hp("3%"),
   },
-  cat_btn: {
+  catBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -208,31 +207,31 @@ const styles = StyleSheet.create({
     shadowRadius: wp("1%"),
     elevation: 4,
   },
-  cat_btnSmall: {
+  catBtnSmall: {
     width: wp("85%"),
     height: hp("7%"),
     marginVertical: hp("1%"),
   },
-  cat_btnTablet: {
+  catBtnTablet: {
     width: wp("35%"),
     height: hp("10%"),
     margin: hp("1.5%"),
     borderRadius: wp("25%"),
   },
-  cate_png: {
+  catePng: {
     width: wp("12%"),
     height: wp("12%"),
     resizeMode: "contain",
   },
-  cate_pngSmall: {
+  catePngSmall: {
     width: wp("10%"),
     height: wp("10%"),
   },
-  cate_pngTablet: {
+  catePngTablet: {
     width: wp("8%"),
     height: wp("8%"),
   },
-  cat_middleText: {
+  catMiddleText: {
     fontSize: wp("6%"),
     fontFamily: "Kavoon",
     textAlign: "center",
@@ -240,11 +239,11 @@ const styles = StyleSheet.create({
     marginLeft: wp("4%"),
     includeFontPadding: false,
   },
-  cat_middleTextSmall: {
+  catMiddleTextSmall: {
     fontSize: wp("5.5%"),
     marginLeft: wp("3%"),
   },
-  cat_middleTextTablet: {
+  catMiddleTextTablet: {
     fontSize: wp("5%"),
     marginLeft: wp("2%"),
   },

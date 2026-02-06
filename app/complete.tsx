@@ -12,10 +12,7 @@ import { useFonts } from "expo-font";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useQuizResult } from "../components/quizResultContext";
 
-/* ---------- Responsive Helpers ---------- */
-
 const { width, height } = Dimensions.get("window");
-
 const BASE_WIDTH = 375;
 const BASE_HEIGHT = 812;
 
@@ -35,8 +32,6 @@ export const scaleFont = (size: number) => {
 
   return Math.round(PixelRatio.roundToNearestPixel(size * adjusted));
 };
-
-/* ======================================= */
 
 export default function CompleteScreen() {
   const router = useRouter();
@@ -89,7 +84,7 @@ export default function CompleteScreen() {
       </View>
 
       {/* Score Text */}
-      <Text style={styles.youGot}>You got</Text>
+      <Text style={[styles.youGot,styles.txtDecoration]}>You got</Text>
 
       {/* Score */}
       <View style={styles.scoreRow}>
@@ -100,7 +95,7 @@ export default function CompleteScreen() {
         <Text
           style={[
             styles.score,
-            { fontSize: scaleFont(30), fontFamily: "Margarine" },
+            { color: 'white',fontSize: scaleFont(30), fontFamily: "Margarine" },
           ]}
         >
           out
@@ -132,13 +127,13 @@ export default function CompleteScreen() {
         <Text style={styles.middleText}>See Results</Text>
       </Pressable>
 
-      <Text style={styles.greatJob}>Great Job!</Text>
+      <Text style={[styles.greatJob,styles.txtDecoration]}>Great Job!</Text>
 
-      <Text style={styles.proudText}>
+      <Text style={[styles.proudText,styles.txtDecoration]}>
         Japanese is proud of you!
       </Text>
 
-      <Text style={styles.practiceText}>
+      <Text style={[styles.proudText,styles.txtDecoration,{fontSize: scaleFont(25)}]}>
         Practice makes perfect!
       </Text>
 
@@ -171,7 +166,7 @@ export default function CompleteScreen() {
             source={require("../assets/images/refresh.png")}
             style={[
               styles.icon,
-              { width: scale(40), height: scale(40) },
+             
             ]}
           />
 
@@ -213,7 +208,6 @@ export default function CompleteScreen() {
   );
 }
 
-/* ---------- Styles ---------- */
 
 const styles = StyleSheet.create({
   bgImage: { flex: 1 },
@@ -243,8 +237,9 @@ const styles = StyleSheet.create({
 
   btn: {
     flexDirection: "row",
-    gap: scale(15),
-    width: scale(180),
+    marginTop:scale(15),
+    gap: scale(10),
+    width: scale(160),
     height: verticalScale(60),
     backgroundColor: "white",
     borderColor: "pink",
@@ -279,49 +274,32 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: verticalScale(20),
   },
-
+  txtDecoration :{
+      color: "white",
+      textAlign: "center",
+      fontWeight: "bold",
+      textShadowColor: "black",
+      textShadowOffset: { width: 3, height: 3 },
+      textShadowRadius: 7,
+    },
   youGot: {
-    color: "white",
     fontSize: scaleFont(40),
-    textAlign: "center",
-    marginTop: verticalScale(20),
-    fontWeight: "bold",
-    textShadowColor: "black",
-    textShadowOffset: { width: 3, height: 3 },
-    textShadowRadius: 7,
+    marginTop: verticalScale(20)
   },
 
   greatJob: {
-    color: "white",
     fontSize: scaleFont(30),
-    textAlign: "center",
     marginTop: verticalScale(40),
-    fontFamily: "Kavoon",
-    textShadowColor: "black",
-    textShadowOffset: { width: 3, height: 3 },
-    textShadowRadius: 7,
   },
 
   proudText: {
-    color: "white",
     fontSize: scaleFont(30),
-    textAlign: "center",
-    marginTop: verticalScale(30),
-    fontFamily: "Kavoon",
-    textShadowColor: "black",
-    textShadowOffset: { width: 3, height: 3 },
-    textShadowRadius: 7,
+    marginTop: verticalScale(30)
   },
 
   practiceText: {
-    color: "white",
     fontSize: scaleFont(25),
-    textAlign: "center",
-    marginTop: verticalScale(30),
-    fontFamily: "Kavoon",
-    textShadowColor: "black",
-    textShadowOffset: { width: 3, height: 3 },
-    textShadowRadius: 7,
+    marginTop: verticalScale(30)
   },
 
   bottomBtns: {

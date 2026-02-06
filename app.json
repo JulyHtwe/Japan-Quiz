@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "hello_japan",
-    "slug": "hello_japan",
+    "name": "Hello Japan Quiz",
+    "slug": "Hello Japan Quiz",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

@@ -6,26 +6,48 @@ import {
   Pressable,
   Dimensions,
   ScrollView,
+  SafeAreaView,
 } from "react-native";
 import { useFonts } from "expo-font";
 import { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+
 const JSON_URL =
   "https://raw.githubusercontent.com/JulyHtwe/japan_quiz/main/hiragana.json";
-
-const { width } = Dimensions.get("window");
-const numColumns = 5;
-const cardSize = width / numColumns - 12;
-
 type HiraganaItem = {
   hiragana: string;
   romaji: string;
   audio?: string;
 };
 
-import { useRouter } from "expo-router";
+const { width, height } = Dimensions.get("window");
+const numColumns = 5;
+const cardSize = Math.min(width / numColumns - 16, 80); // Responsive card size
+const isSmallDevice = height < 365;
+const isLargeDevice = width > 768;
 
-const createExactGridStructure = () => {
-  return [
+export default function HiraganaScreen() {
+  const router = useRouter();
+  const [hiraganaData, setHiraganaData] = useState<HiraganaItem[]>([]);
+  const [fontLoaded] = useFonts({
+    Kavoon: require("../assets/fonts/Kavoon-Regular.ttf"),
+    Margarine: require("../assets/fonts/Margarine-Regular.ttf"),
+  });
+
+  useEffect(() => {
+    fetch(JSON_URL)
+      .then((res) => res.json())
+      .then((data: HiraganaItem[]) => {
+        setHiraganaData(data);
+      })
+      .catch((error) => {
+        console.log("Error fetching data, using static structure:", error);
+      });
+  }, []);
+
+  if (!fontLoaded) return null;
+
+  const gridData = [
     [
       { hiragana: "あ", romaji: "a" },
       { hiragana: "い", romaji: "i" },
@@ -104,139 +126,166 @@ const createExactGridStructure = () => {
       { hiragana: "ん", romaji: "n" },
     ],
   ];
-};
 
-export default function HiraganaScreen() {
-  const router = useRouter();
-  const [hiraganaData, setHiraganaData] = useState<HiraganaItem[]>([]);
-  const [fontLoaded] = useFonts({
-    Kavoon: require("../assets/fonts/Kavoon-Regular.ttf"),
-    Margarine: require("../assets/fonts/Margarine-Regular.ttf"),
-  });
-
-  useEffect(() => {
-    fetch(JSON_URL)
-      .then((res) => res.json())
-      .then((data: HiraganaItem[]) => {
-        setHiraganaData(data);
-      })
-      .catch((error) => {
-        console.log("Error fetching data, using static structure:", error);
-      });
-  }, []);
-
-  if (!fontLoaded) return null;
-
-  const gridData = createExactGridStructure();
+  const startQuiz = () => {
+    router.push("/question?category=Hiragana&index=0&score=0");
+  };
 
   return (
-    <ImageBackground
-      source={require("../assets/images/bg_3.png")}
-      style={styles.bgImage}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Pressable
-          onPress={() =>
-            router.push("/question?category=Hiragana&index=0&score=0")
-          }
-          style={({ pressed }) => [
-            styles.quizBtn,
-            { backgroundColor: pressed ? "#ffe6f0" : "white" },
-          ]}
-        >
-          <Text style={styles.quizBtnText}>Start Hiragana Quiz</Text>
-        </Pressable>
-
- 
-        <View style={styles.gridContainer}>
-          {gridData.map((row, rowIndex) => (
-            <View key={rowIndex} style={styles.row}>
-              {row.map((item, colIndex) => {
-       
-                if (!item.hiragana) {
-                  return (
-                    <View
-                      key={`${rowIndex}-${colIndex}`}
-                      style={[styles.card, styles.emptyCard]}
-                    />
-                  );
-                }
-
-                return (
-                  <View key={`${rowIndex}-${colIndex}`} style={styles.card}>
-                    <Text style={styles.hiragana}>{item.hiragana}</Text>
-                    <Text style={styles.romaji}>{item.romaji}</Text>
-                  </View>
-                );
-              })}
-            </View>
-          ))}
+    <SafeAreaView style={styles.safeArea}>
+      <ImageBackground
+        source={require("../assets/images/bg_3.png")}
+        style={styles.backgroundImage}
+        resizeMode="cover"
+      >
+        <View style={styles.headerContainer}>
+          <Pressable
+            onPress={startQuiz}
+            style={({ pressed }) => [
+              styles.quizButton,
+              pressed && styles.quizButtonPressed,
+            ]}
+          >
+            <Text style={styles.quizButtonText}>Start Hiragana Quiz</Text>
+          </Pressable>
         </View>
-      </ScrollView>
-    </ImageBackground>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          bounces={true}
+        >
+          <View style={styles.gridContainer}>
+            {gridData.map((row, rowIndex) => (
+              <View key={`row-${rowIndex}`} style={styles.row}>
+                {row.map((item, colIndex) => {
+                  const key = `cell-${rowIndex}-${colIndex}`;
+
+                  if (!item.hiragana) {
+                    return (
+                      <View key={key} style={[styles.card, styles.emptyCard]} />
+                    );
+                  }
+
+                  return (
+                    <View key={key} style={styles.card}>
+                      <Text style={styles.hiraganaText}>{item.hiragana}</Text>
+                      <Text style={styles.romajiText}>{item.romaji}</Text>
+                    </View>
+                  );
+                })}
+              </View>
+            ))}
+          </View>
+
+          <View style={styles.bottomSpacing} />
+        </ScrollView>
+      </ImageBackground>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  bgImage: { flex: 1, width: "100%", height: "100%" },
-  scrollContainer: {
-    paddingVertical: 20,
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  backgroundImage: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
+  scrollContent: {
+    
+    flexGrow: 1,
+    paddingVertical: isSmallDevice ? 16 : 24,
+    paddingHorizontal: isLargeDevice ? 32 : 16,
     alignItems: "center",
   },
-  gridContainer: {
+  headerContainer: {
+    width: "100%",
+    alignItems: "center",
+    marginTop: isSmallDevice ? 10 : 20,
+    marginBottom: isSmallDevice ? 16 : 24,
+    paddingHorizontal: 16,
+  },
+  quizButton: {
+    marginTop: isLargeDevice ? 20 : 60,
+    width: isLargeDevice ? 280 : width * 0.7,
+    height: isSmallDevice ? 56 : 64,
+    borderRadius: 30,
+    borderWidth: 3,
+    borderColor: "#ff69b4",
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+  },
+  quizButtonPressed: {
+    backgroundColor: "#fff0f6",
+    transform: [{ scale: 0.98 }],
+  },
+  quizButtonText: {
+    fontSize: isSmallDevice ? 18 : 22,
+    fontFamily: "Kavoon",
+    color: "#333",
+    textAlign: "center",
+    paddingHorizontal: 8,
+  },
+  gridContainer: {
+    width: "100%",
+    maxWidth: 600,
+    backgroundColor: "rgba(255, 255, 255, 0.85)",
+    borderRadius: 16,
+    padding: isSmallDevice ? 8 : 12,
+    marginHorizontal: "auto",
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
   },
   row: {
     flexDirection: "row",
     justifyContent: "center",
+    marginVertical: isSmallDevice ? 2 : 4,
   },
   card: {
     width: cardSize,
     height: cardSize,
-    margin: 5,
-    borderRadius: 8,
-    backgroundColor: "#ffe6f0",
+    margin: isSmallDevice ? 3 : 4,
+    borderRadius: 10,
+    backgroundColor: "#ffe6f2",
     justifyContent: "center",
     alignItems: "center",
+    elevation: 2,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
     shadowRadius: 3,
-    elevation: 3,
   },
   emptyCard: {
     backgroundColor: "transparent",
-    shadowOpacity: 0,
     elevation: 0,
-    borderWidth: 0,
+    shadowOpacity: 0,
   },
-  hiragana: {
-    fontSize: 28,
+  hiraganaText: {
+    fontSize: isLargeDevice ? 32 : isSmallDevice ? 24 : 28,
     fontFamily: "Kavoon",
     fontWeight: "bold",
-    color: "#333",
+    color: "#2c3e50",
   },
-  romaji: {
-    fontSize: 14,
-    marginTop: 5,
+  romajiText: {
+    fontSize: isSmallDevice ? 12 : 14,
     fontFamily: "Margarine",
-    color: "#555",
+    color: "#7f8c8d",
+    marginTop: 4,
+    letterSpacing: 0.5,
   },
-  quizBtn: {
-    width: 200,
-    height: 60,
-    borderRadius: 30,
-    borderWidth: 3,
-    borderColor: "pink",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 20,
-    elevation: 5,
-  },
-  quizBtnText: {
-    fontSize: 20,
-    fontFamily: "Kavoon",
-    color: "#333",
+  bottomSpacing: {
+    height: isSmallDevice ? 30 : 50,
   },
 });

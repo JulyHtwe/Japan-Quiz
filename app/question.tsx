@@ -38,6 +38,7 @@ type QuizItem = {
 type HiraganaItem = {
   hiragana: string;
   romaji: string;
+  audio : string;
 };
 const JSON_URL =
   "https://raw.githubusercontent.com/JulyHtwe/japan_quiz/main/quiz.json";
@@ -133,17 +134,24 @@ export default function QuestionScreen() {
 
   //Audio
   const playAudio = async () => {
-    if (!question || !("image" in question)) return;
+  if (!question) return;
 
-    try {
-      const { sound } = await Audio.Sound.createAsync({
-        uri: AUDIO_BASE_URL + question.audio,
-      });
-      await sound.playAsync();
-    } catch (err) {
-      console.log("Audio error:", err);
-    }
-  };
+  const audioFile =
+    "audio" in question ? question.audio : null;
+
+  if (!audioFile) return;
+
+  try {
+    const { sound } = await Audio.Sound.createAsync({
+      uri: AUDIO_BASE_URL + audioFile,
+    });
+
+    await sound.playAsync();
+  } catch (err) {
+    console.log("Audio error:", err);
+  }
+};
+
 
   if (!fontLoaded || !question) {
     return (
@@ -160,7 +168,7 @@ export default function QuestionScreen() {
       source={require("../assets/images/bg_3.png")}
       style={styles.bgImage}
     >
-      <Text style={styles.question_no}>
+      <Text style={styles.questionNo}>
         Question {currentIndex + 1} of {TOTAL_QUESTIONS}
       </Text>
 
@@ -170,10 +178,10 @@ export default function QuestionScreen() {
       </View>
 
       {/* Title */}
-      <View style={[styles.complete_btn, { marginTop: "30%" }]}>
+      <View style={[styles.completeBtn, { marginTop: "30%" }]}>
         <Text
           style={[
-            styles.cat_middleText,
+            styles.catMiddleText,
             { color: "black", fontSize: scaleFont(30) },
           ]}
         >
@@ -187,7 +195,7 @@ export default function QuestionScreen() {
       </Text>
 
       {/* Audio Button */}
-      {"image" in question && (
+      {"audio" in question && (
         <Pressable style={styles.soundBtn} onPress={playAudio}>
           <Image
             source={require("../assets/images/volume.png")}
@@ -206,25 +214,39 @@ export default function QuestionScreen() {
           const id = "image" in item ? item.image : item.romaji;
           return (
             <Pressable
-              key={idx}
-              onPress={() => setSelected(id)}
-              style={({ pressed }) => [
-                // base style only contains things that are always the same
-                {
-                  width: scale(80),
-                  height: scale(80),
-                  borderRadius: scale(40),
-                  justifyContent: "center",
-                  alignItems: "center",
-                  transform: [{ scale: pressed ? 0.97 : 1 }],
-                  backgroundColor: "white", // default background, overridden by selected/unselected
-                },
-                // conditional styles
-                selected === id
-                  ? styles.selectedCircle
-                  : styles.unselectedCircle,
-              ]}
-            >
+  key={idx}
+  onPress={() => setSelected(id)}
+  style={({ pressed }) => [
+    {
+      width: scale(80),
+      height: scale(80),
+      borderRadius: scale(40),
+      justifyContent: "center",
+      alignItems: "center",
+
+      // smooth press animation
+      transform: [{ scale: pressed ? 0.97 : 1 }],
+
+      // background
+      backgroundColor: pressed
+        ? "#ffe6f0"
+        : selected === id
+        ? "#ffd6ea"
+        : "white",
+
+      // border
+      borderWidth: 3,
+      borderColor: selected === id ? "pink" : "white",
+
+      // shadow fix (important)
+      shadowColor: selected === id ? "pink" : "#000",
+      shadowOpacity: selected === id ? 0.3 : 0.08,
+      shadowRadius: selected === id ? 6 : 2,
+      elevation: selected === id ? 8 : 2,
+    },
+  ]}
+>
+
               {"hiragana" in item ? (
                 <Text
                   style={{
@@ -247,14 +269,20 @@ export default function QuestionScreen() {
 
       {/* Confirm Button */}
       <Pressable
-        style={({ pressed }) => [
-          styles.btn,
-          {
-            backgroundColor: pressed ? "#ffe6f0" : "white",
-            transform: [{ scale: pressed ? 0.97 : 1 }],
-          },
-        ]}
-        disabled={!selected}
+         disabled={!selected}
+                  style={({ pressed }) => [
+                    styles.btn,
+                    {
+                      borderColor: selected ? "pink" : "#cccccc",
+                      opacity: selected ? 1 : 0.6,
+                      backgroundColor: pressed ? "#ffe6f0" : "white",
+                      transform: [{ scale: pressed ? 0.97 : 1 }],
+                      shadowColor: selected ? "pink" : "#000",
+                      shadowOpacity: selected ? 0.3 : 0.1,
+                      shadowRadius: selected ? 30 : 50,
+                      elevation: selected ? 8 : 3,
+                    },
+                  ]}
         onPress={() => {
           if (!question || !selected) return;
 
@@ -265,14 +293,23 @@ export default function QuestionScreen() {
 
           const newScore = isCorrect ? currentScore + 1 : currentScore;
 
-          addResult({
-            question: "name" in question ? question.name : question.hiragana,
-            options: options.map((o) => ("image" in o ? o.image : o.romaji)),
-            correctAnswer,
-            correctAudio: "image" in question ? question.audio : "",
-            selectedAnswer: selected,
-            isCorrect,
-          });
+     addResult({
+  question:
+    "hiragana" in question
+      ? `${question.hiragana} (${question.romaji})`
+      : question.name,
+
+  options: options.map((o) =>
+    "hiragana" in o ? o.romaji : o.image
+  ),
+
+  correctAnswer,
+  correctAudio: "audio" in question ? question.audio : "",
+  selectedAnswer: selected,
+  isCorrect,
+});
+
+
 
           router.replace({
             pathname: isCorrect ? "/correct" : "/incorrect",
@@ -304,7 +341,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  question_no: {
+  questionNo: {
     marginTop: verticalScale(60),
     marginLeft: scale(35),
     fontFamily: "Kavoon",
@@ -386,7 +423,7 @@ const styles = StyleSheet.create({
     fontSize: scaleFont(20),
     textAlign: "center",
   },
-  complete_btn: {
+  completeBtn: {
     flexDirection: "row",
     width: scale(329),
     height: verticalScale(120),
@@ -396,7 +433,7 @@ const styles = StyleSheet.create({
     borderRadius: scale(75),
     alignSelf: "center",
   },
-  cat_middleText: {
+  catMiddleText: {
     fontSize: scaleFont(35),
     color: "white",
     fontFamily: "Margarine",
