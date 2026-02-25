@@ -1,4 +1,4 @@
-import { StyleSheet, ImageBackground, Text, View, Image, Pressable } from 'react-native';
+import { StyleSheet, ImageBackground, Text, View, Image, Pressable,Dimensions } from 'react-native';
 import { useFonts } from 'expo-font';
 import { router } from 'expo-router';
 import { 
@@ -6,14 +6,22 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 
+// Helper to scale fonts proportionally
+ const { width, height } = Dimensions.get("window");
+const isTablet = width >= 768;
+
+const scaleFont = (percent:any) => {
+  const value = wp(percent);
+  if (isTablet) return value * 0.8;
+  return value;
+};
+
 export default function HomeScreen() {
   const [fontLoaded] = useFonts({
     Kavoon: require('../assets/fonts/Kavoon-Regular.ttf'),
   });
 
-  if(!fontLoaded) {
-    return null;
-  }
+  if (!fontLoaded) return null;
 
   return (
     <ImageBackground
@@ -26,15 +34,9 @@ export default function HomeScreen() {
         <View style={styles.headerSection}>
           <Text style={styles.mainTitle}>Hello Japan</Text>
           <View style={styles.flagRow}>
-            <Image 
-              source={require('../assets/images/japan-flag.png')} 
-              style={styles.flag}
-            />
+            <Image source={require('../assets/images/japan-flag.png')} style={styles.flag} />
             <Text style={styles.quizTitle}>Quiz</Text>
-            <Image 
-              source={require('../assets/images/japan-flag.png')} 
-              style={styles.flag}
-            />
+            <Image source={require('../assets/images/japan-flag.png')} style={styles.flag} />
           </View>
         </View>
 
@@ -45,36 +47,24 @@ export default function HomeScreen() {
             <Text style={styles.contentText}>Japanese Vocab</Text>
             <Text style={styles.contentText}>The Fun Way!</Text>
           </View>
-          
+
           <View style={styles.textBlock}>
             <Text style={styles.contentText}>Ready to test your</Text>
             <Text style={styles.contentText}>Brain</Text>
           </View>
 
-          <Image 
-            source={require('../assets/images/b1_girl.png')} 
-            style={styles.girlImage}
-          />
+          <Image source={require('../assets/images/b1_girl.png')} style={styles.girlImage} />
         </View>
 
         {/* Button */}
         <View style={styles.buttonSection}>
           <Pressable 
-            style={({ pressed }) => [
-              styles.startButton,
-              pressed && styles.buttonPressed
-            ]} 
+            style={({ pressed }) => [styles.startButton, pressed && styles.buttonPressed]}
             onPress={() => router.push('/categories')}
           >
-            <Image 
-              source={require('../assets/images/b1-startup.png')} 
-              style={styles.buttonIconLeft}
-            />
+            <Image source={require('../assets/images/b1-startup.png')} style={styles.buttonIconLeft} />
             <Text style={styles.buttonText}>Start Quiz</Text>
-            <Image 
-              source={require('../assets/images/b1-startup.png')} 
-              style={styles.buttonIconRight}
-            />
+            <Image source={require('../assets/images/b1-startup.png')} style={styles.buttonIconRight} />
           </Pressable>
         </View>
       </View>
@@ -96,7 +86,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   mainTitle: {
-    fontSize: wp('11%'),
+    fontSize: scaleFont('11%'), // scaled font
     color: 'black',
     fontFamily: 'Kavoon',
     textShadowColor: 'white',
@@ -116,7 +106,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   quizTitle: {
-    fontSize: wp('11%'),
+    fontSize: scaleFont('11%'),
     color: 'black',
     fontFamily: 'Kavoon',
     textShadowColor: 'white',
@@ -136,7 +126,7 @@ const styles = StyleSheet.create({
     marginBottom: hp('3%'),
   },
   contentText: {
-    fontSize: wp('9%'),
+    fontSize: scaleFont('9%'),
     color: 'white',
     fontFamily: 'Kavoon',
     textShadowColor: 'pink',
@@ -179,7 +169,7 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.98 }],
   },
   buttonText: {
-    fontSize: wp('7%'),
+    fontSize: scaleFont('7%'),
     color: 'black',
     fontFamily: 'Kavoon',
     textAlign: 'center',

@@ -5,9 +5,9 @@ import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { QuizResultProvider } from "../components/quizResultContext";
 
-export const unstable_settings = {
-  anchor: "(tabs)",
-};
+// export const unstable_settings = {
+//   anchor: "(tabs)",
+// };
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -16,8 +16,8 @@ export default function RootLayout() {
     <QuizResultProvider>
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="index" />
+          <Stack.Screen name="login"/> 
+          <Stack.Screen name="index"/>
           <Stack.Screen name="categories" options={{ presentation: "modal" }} />
           <Stack.Screen name="question" options={{ presentation: "modal" }} />
           <Stack.Screen name="correct" options={{ presentation: "modal" }} />

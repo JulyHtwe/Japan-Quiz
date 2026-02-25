@@ -9,15 +9,21 @@ import {
   Dimensions,
 } from "react-native";
 import { useFonts } from "expo-font";
-import { Audio } from "expo-av";
+import { Audio, AVPlaybackStatus, AVPlaybackStatusError } from "expo-av";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from "react-native-responsive-screen";
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
+const isTablet = width >= 768;
 
-// Responsive helpers
-const wp = (percent: string) => (width * parseFloat(percent)) / 100;
-const hp = (percent: string) => (height * parseFloat(percent)) / 100;
+const scaleFont = (percent: string) => {
+  const value = wp(percent);
+  return isTablet ? value * 0.8 : value;
+};
 
 const AUDIO_BASE_URL =
   "https://raw.githubusercontent.com/JulyHtwe/japan_quiz/main/audio/";
@@ -26,7 +32,6 @@ const IMAGE_BASE_URL =
 
 export default function Correct() {
   const router = useRouter();
-
   const { name, romaji, image, audio, category, index, score } =
     useLocalSearchParams<{
       name: string;
@@ -47,7 +52,7 @@ export default function Correct() {
     Margarine: require("../assets/fonts/Margarine-Regular.ttf"),
   });
 
-  // Disable Android back button
+  // Disable hardware back button
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
@@ -56,16 +61,33 @@ export default function Correct() {
     return () => backHandler.remove();
   }, []);
 
-  // Audio safe play
+  const soundRef = useRef<Audio.Sound | null>(null);
+
   const playAudio = async () => {
     if (!audio) return;
+
     try {
-      const { sound } = await Audio.Sound.createAsync({
-        uri: AUDIO_BASE_URL + audio,
-      });
+      if (soundRef.current) await soundRef.current.unloadAsync();
+
+      const sound = new Audio.Sound();
+      soundRef.current = sound;
+      await sound.loadAsync({ uri: AUDIO_BASE_URL + audio });
       await sound.playAsync();
+
+      sound.setOnPlaybackStatusUpdate(
+        async (status: AVPlaybackStatus | AVPlaybackStatusError) => {
+          if ("didJustFinish" in status && status.didJustFinish) {
+            await sound.unloadAsync();
+          }
+        }
+      );
     } catch (err) {
       console.log("Audio error:", err);
+      if (soundRef.current) {
+        try {
+          await soundRef.current.unloadAsync();
+        } catch {}
+      }
     }
   };
 
@@ -85,7 +107,6 @@ export default function Correct() {
         <Text style={styles.title}>Correct</Text>
         <Text style={styles.subtitle}>The correct answer is:</Text>
 
-        {/* Image OR romaji */}
         {image ? (
           <View style={styles.imageShadow}>
             <Image
@@ -94,18 +115,24 @@ export default function Correct() {
             />
           </View>
         ) : (
-          <Text style={styles.correctText}>{romaji}</Text>
+          <Text style={[styles.correctText, { fontSize: scaleFont("10%") }]}>
+            {romaji}
+          </Text>
+        )}
+        {name && (
+          <Text style={[styles.correctText, { fontSize: scaleFont("8%") }]}>
+            {name}
+          </Text>
         )}
 
-        {/* Name always */}
-        {name && <Text style={styles.correctText}>{name}</Text>}
+        {audio && (
+          <Pressable style={styles.soundBtn} onPress={playAudio}>
+            <Text style={[styles.middleText, { fontSize: scaleFont("2.5%") }]}>
+              🔊 Hear it!
+            </Text>
+          </Pressable>
+        )}
 
-        {/* Audio button */}
-        <Pressable style={styles.soundBtn} onPress={playAudio}>
-          <Text style={styles.middleText}>🔊 Hear it!</Text>
-        </Pressable>
-
-        {/* Next button */}
         <Pressable
           style={({ pressed }) => [
             styles.btn,
@@ -116,10 +143,7 @@ export default function Correct() {
           ]}
           onPress={() => {
             if (isLastQuestion) {
-              router.replace({
-                pathname: "/complete",
-                params: { score, category },
-              });
+              router.replace({ pathname: "/complete", params: { score, category } });
             } else {
               router.replace({
                 pathname: "/question",
@@ -132,7 +156,7 @@ export default function Correct() {
             }
           }}
         >
-          <Text style={styles.btnText}>
+          <Text style={[styles.btnText, { fontSize: scaleFont("5%") }]}>
             {isLastQuestion ? "Complete" : "Next Word"}
           </Text>
         </Pressable>
@@ -147,44 +171,38 @@ const styles = StyleSheet.create({
     width: wp("100%"),
     height: hp("100%"),
   },
-
   container: {
     top: hp("10%"),
     gap: hp("2%"),
     justifyContent: "center",
     alignItems: "center",
   },
-
   icon: {
     width: wp("20%"),
     height: wp("20%"),
     borderRadius: wp("10%"),
     elevation: 10,
   },
-
   title: {
-    fontSize: wp("12%"),
+    fontSize: scaleFont("12%"),
     fontFamily: "Kavoon",
     color: "black",
     textShadowColor: "white",
     textShadowOffset: { width: 3, height: 3 },
     textShadowRadius: 10,
   },
-
   subtitle: {
-    fontSize: wp("4.5%"),
+    fontSize: scaleFont("4.5%"),
     fontFamily: "Kavoon",
     color: "black",
     marginTop: hp("2%"),
   },
-
   correctText: {
-    fontSize: wp("10%"),
     fontFamily: "Kavoon",
     color: "black",
     marginTop: hp("1%"),
+    textAlign: "center",
   },
-
   btn: {
     marginTop: hp("6%"),
     width: wp("60%"),
@@ -196,12 +214,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: wp("12%"),
   },
-
   btnText: {
-    fontSize: hp("4%"),
     fontFamily: "Kavoon",
+    textAlign: "center",
   },
-
   imageShadow: {
     width: wp("30%"),
     height: wp("30%"),
@@ -215,19 +231,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-
   answerImage: {
     width: wp("25%"),
     height: wp("25%"),
     borderRadius: wp("10%"),
   },
-
   middleText: {
     fontFamily: "Kavoon",
     textAlign: "center",
-    fontSize: hp("2%"),
   },
-
   soundBtn: {
     padding: hp("1%"),
     backgroundColor: "white",

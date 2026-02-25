@@ -38,7 +38,7 @@ type QuizItem = {
 type HiraganaItem = {
   hiragana: string;
   romaji: string;
-  audio : string;
+  audio: string;
 };
 const JSON_URL =
   "https://raw.githubusercontent.com/JulyHtwe/japan_quiz/main/quiz.json";
@@ -132,25 +132,59 @@ export default function QuestionScreen() {
     }
   }, [hiraganaList, quizList, currentIndex]);
 
-  //Audio
-  const playAudio = async () => {
-  if (!question) return;
+  //audio play
+const playAudio = async (audio?: any) => {
+  if (!audio) return;
 
-  const audioFile =
-    "audio" in question ? question.audio : null;
-
-  if (!audioFile) return;
-
+  let sound:any;
   try {
-    const { sound } = await Audio.Sound.createAsync({
-      uri: AUDIO_BASE_URL + audioFile,
-    });
+    sound = new Audio.Sound();
 
+    // Load the audio first
+    await sound.loadAsync({ uri: AUDIO_BASE_URL + audio });
+
+    // Play after it's fully loaded
     await sound.playAsync();
-  } catch (err) {
-    console.log("Audio error:", err);
+
+    // Unload exactly when finished
+    sound.setOnPlaybackStatusUpdate(async (status:any) => {
+      if (!("didJustFinish" in status)) return;
+      if (status.didJustFinish) {
+        await sound.unloadAsync();
+      }
+    });
+  } catch (e) {
+    console.log("Audio error:", e);
+    if (sound) {
+      try {
+        await sound.unloadAsync();
+      } catch {}
+    }
   }
 };
+
+
+const correctSound = new Audio.Sound();
+const wrongSound = new Audio.Sound();
+
+const loadSounds = async () => {
+  await correctSound.loadAsync(require("../assets/audio/correct.mp3"));
+  await wrongSound.loadAsync(require("../assets/audio/wrong.mp3"));
+};
+useEffect(() => {
+  loadSounds();
+
+  return () => {
+    correctSound.unloadAsync();
+    wrongSound.unloadAsync();
+  };
+}, []);
+
+const playResultSound = async (isCorrect: boolean) => {
+  const sound = isCorrect ? correctSound : wrongSound;
+  await sound.replayAsync(); // plays instantly
+};
+
 
 
   if (!fontLoaded || !question) {
@@ -171,13 +205,10 @@ export default function QuestionScreen() {
       <Text style={styles.questionNo}>
         Question {currentIndex + 1} of {TOTAL_QUESTIONS}
       </Text>
-
-      {/* Progress */}
       <View style={styles.progressBg}>
         <View style={[styles.progressFill, { width: `${progressPercent}%` }]} />
       </View>
 
-      {/* Title */}
       <View style={[styles.completeBtn, { marginTop: "30%" }]}>
         <Text
           style={[
@@ -189,14 +220,14 @@ export default function QuestionScreen() {
         </Text>
       </View>
 
-      {/* Question Text */}
+      {/* question */}
       <Text style={styles.word}>
         {"hiragana" in question ? question.hiragana : question.name}
       </Text>
 
-      {/* Audio Button */}
+      {/* audio btn */}
       {"audio" in question && (
-        <Pressable style={styles.soundBtn} onPress={playAudio}>
+        <Pressable style={styles.soundBtn} onPress={() => playAudio(question.audio)}>
           <Image
             source={require("../assets/images/volume.png")}
             style={{
@@ -208,45 +239,36 @@ export default function QuestionScreen() {
         </Pressable>
       )}
 
-      {/* Answers */}
+      {/* answers */}
       <View style={styles.answerContainer}>
         {options.map((item, idx) => {
           const id = "image" in item ? item.image : item.romaji;
           return (
             <Pressable
-  key={idx}
-  onPress={() => setSelected(id)}
-  style={({ pressed }) => [
-    {
-      width: scale(80),
-      height: scale(80),
-      borderRadius: scale(40),
-      justifyContent: "center",
-      alignItems: "center",
-
-      // smooth press animation
-      transform: [{ scale: pressed ? 0.97 : 1 }],
-
-      // background
-      backgroundColor: pressed
-        ? "#ffe6f0"
-        : selected === id
-        ? "#ffd6ea"
-        : "white",
-
-      // border
-      borderWidth: 3,
-      borderColor: selected === id ? "pink" : "white",
-
-      // shadow fix (important)
-      shadowColor: selected === id ? "pink" : "#000",
-      shadowOpacity: selected === id ? 0.3 : 0.08,
-      shadowRadius: selected === id ? 6 : 2,
-      elevation: selected === id ? 8 : 2,
-    },
-  ]}
->
-
+              key={idx}
+              onPress={() => setSelected(id)}
+              style={({ pressed }) => [
+                {
+                  width: scale(80),
+                  height: scale(80),
+                  borderRadius: scale(40),
+                  justifyContent: "center",
+                  alignItems: "center",
+                  transform: [{ scale: pressed ? 0.97 : 1 }], //smooth press animation
+                  backgroundColor: pressed
+                    ? "#ffe6f0"
+                    : selected === id
+                      ? "#ffd6ea"
+                      : "white",
+                  borderWidth: 3,
+                  borderColor: selected === id ? "pink" : "white",
+                  shadowColor: selected === id ? "pink" : "#000",
+                  shadowOpacity: selected === id ? 0.3 : 0.08,
+                  shadowRadius: selected === id ? 6 : 2,
+                  elevation: selected === id ? 8 : 2,
+                },
+              ]}
+            >
               {"hiragana" in item ? (
                 <Text
                   style={{
@@ -266,51 +288,41 @@ export default function QuestionScreen() {
           );
         })}
       </View>
-
-      {/* Confirm Button */}
       <Pressable
-         disabled={!selected}
-                  style={({ pressed }) => [
-                    styles.btn,
-                    {
-                      borderColor: selected ? "pink" : "#cccccc",
-                      opacity: selected ? 1 : 0.6,
-                      backgroundColor: pressed ? "#ffe6f0" : "white",
-                      transform: [{ scale: pressed ? 0.97 : 1 }],
-                      shadowColor: selected ? "pink" : "#000",
-                      shadowOpacity: selected ? 0.3 : 0.1,
-                      shadowRadius: selected ? 30 : 50,
-                      elevation: selected ? 8 : 3,
-                    },
-                  ]}
+        disabled={!selected}
+        style={({ pressed }) => [
+          styles.btn,
+          {
+            borderColor: selected ? "pink" : "#cccccc",
+            opacity: selected ? 1 : 0.6,
+            backgroundColor: pressed ? "#ffe6f0" : "white",
+            transform: [{ scale: pressed ? 0.97 : 1 }],
+            shadowColor: selected ? "pink" : "#000",
+            shadowOpacity: selected ? 0.3 : 0.1,
+            shadowRadius: selected ? 30 : 50,
+            elevation: selected ? 8 : 3,
+          },
+        ]}
         onPress={() => {
           if (!question || !selected) return;
-
+          // image or romaji
           const correctAnswer =
             "image" in question ? question.image : question.romaji;
-
           const isCorrect = selected === correctAnswer;
+          playResultSound(isCorrect);
 
           const newScore = isCorrect ? currentScore + 1 : currentScore;
+          // quizResultContext
+          addResult({
+            question:
+              "hiragana" in question ? question.hiragana : question.name,
 
-     addResult({
-  question:
-    "hiragana" in question
-      ? `${question.hiragana} (${question.romaji})`
-      : question.name,
-
-  options: options.map((o) =>
-    "hiragana" in o ? o.romaji : o.image
-  ),
-
-  correctAnswer,
-  correctAudio: "audio" in question ? question.audio : "",
-  selectedAnswer: selected,
-  isCorrect,
-});
-
-
-
+            options: options.map((o) => ("hiragana" in o ? o.romaji : o.image)),
+            correctAnswer,
+            correctAudio: "audio" in question ? question.audio : "",
+            selectedAnswer: selected,
+            isCorrect,
+          });
           router.replace({
             pathname: isCorrect ? "/correct" : "/incorrect",
             params: {
@@ -407,7 +419,7 @@ const styles = StyleSheet.create({
     // elevation:1
   },
   btn: {
-    marginTop: verticalScale(50),
+    marginTop: verticalScale(35),
     width: scale(250),
     height: verticalScale(80),
     backgroundColor: "white",

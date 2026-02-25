@@ -19,13 +19,19 @@ import {
 export default function CategoriesScreen() {
   const router = useRouter();
   const [selected, setSelected] = useState<string | null>(null);
-  const { width, height } = Dimensions.get("window");
-  const isSmallScreen = height < 700;
+
+  const { width } = Dimensions.get("window");
   const isTablet = width >= 768;
+
+  const scaleFont = (percent: string) => {
+    const value = wp(percent);
+    return isTablet ? value * 0.8 : value;
+  };
 
   const [fontLoaded] = useFonts({
     Kavoon: require("../assets/fonts/Kavoon-Regular.ttf"),
   });
+
   if (!fontLoaded) return null;
 
   const categories = [
@@ -38,15 +44,14 @@ export default function CategoriesScreen() {
 
   const renderItem = ({ item }: { item: typeof categories[0] }) => {
     const isSelected = selected === item.name;
+
     return (
       <Pressable
         onPress={() => setSelected(item.name)}
         style={({ pressed }) => [
           styles.catBtn,
-          isSmallScreen && styles.catBtnSmall,
           isTablet && styles.catBtnTablet,
           {
-            borderWidth: wp("1%"),
             borderColor: isSelected ? "pink" : "white",
             backgroundColor: pressed
               ? "#ffe6f0"
@@ -54,30 +59,12 @@ export default function CategoriesScreen() {
               ? "#ffd6ea"
               : "white",
             transform: [{ scale: pressed ? 1.05 : 1 }],
-            shadowColor: isSelected ? "pink" : "#000",
-            shadowOpacity: isSelected ? 0.3 : 0.1,
-            shadowRadius: isSelected ? wp("2%") : wp("1%"),
             elevation: isSelected ? 8 : 3,
-            marginBottom: hp("2%"),
-            marginRight: wp("3%"),
           },
         ]}
       >
-        <Image
-          source={item.image}
-          style={[
-            styles.catePng,
-            isSmallScreen && styles.catePngSmall,
-            isTablet && styles.catePngTablet,
-          ]}
-        />
-        <Text
-          style={[
-            styles.catMiddleText,
-            isSmallScreen && styles.catMiddleTextSmall,
-            isTablet && styles.catMiddleTextTablet,
-          ]}
-        >
+        <Image source={item.image} style={styles.catePng} />
+        <Text style={[styles.catText, { fontSize: scaleFont("6%") }]}>
           {item.name}
         </Text>
       </Pressable>
@@ -90,13 +77,8 @@ export default function CategoriesScreen() {
       style={styles.bgImage}
       resizeMode="cover"
     >
-      <View
-        style={[
-          styles.headerContainer,
-          { marginTop: isSmallScreen ? hp("10%") : hp("11%") },
-        ]}
-      >
-        <Text style={[styles.header, isTablet && styles.headerTablet]}>
+      <View style={styles.headerContainer}>
+        <Text style={[styles.header, { fontSize: scaleFont("11%") }]}>
           Categories
         </Text>
       </View>
@@ -109,7 +91,6 @@ export default function CategoriesScreen() {
         contentContainerStyle={{
           alignItems: "center",
           paddingVertical: hp("2%"),
-          paddingHorizontal: wp("5%"),
         }}
       />
 
@@ -118,17 +99,11 @@ export default function CategoriesScreen() {
           disabled={!selected}
           style={({ pressed }) => [
             styles.btn,
-            isSmallScreen && styles.btnSmall,
             isTablet && styles.btnTablet,
             {
-              borderColor: selected ? "pink" : "#cccccc",
+              borderColor: selected ? "pink" : "#ccc",
               opacity: selected ? 1 : 0.6,
               backgroundColor: pressed ? "#ffe6f0" : "white",
-              transform: [{ scale: pressed ? 0.97 : 1 }],
-              shadowColor: selected ? "pink" : "#000",
-              shadowOpacity: selected ? 0.3 : 0.1,
-              shadowRadius: selected ? wp("2%") : wp("1%"),
-              elevation: selected ? 8 : 3,
             },
           ]}
           onPress={() => {
@@ -140,9 +115,8 @@ export default function CategoriesScreen() {
           <Text
             style={[
               styles.btnText,
-              isSmallScreen && styles.btnTextSmall,
-              isTablet && styles.btnTextTablet,
-              !selected && styles.btnTextDisabled,
+              { fontSize: scaleFont("6%") },
+              !selected && { color: "#999" },
             ]}
           >
             Confirm
@@ -152,47 +126,24 @@ export default function CategoriesScreen() {
     </ImageBackground>
   );
 }
-
 const styles = StyleSheet.create({
   bgImage: {
     flex: 1,
-    width: "100%",
-    height: "100%",
   },
+
   headerContainer: {
     alignItems: "center",
-    width: "100%",
+    marginTop: hp("10%"),
   },
+
   header: {
-    fontSize: wp("11%"),
-    color: "black",
     fontFamily: "Kavoon",
+    color: "black",
     textShadowColor: "white",
     textShadowOffset: { width: wp("0.5%"), height: wp("0.5%") },
-    textShadowRadius: wp("1.5%"),
-    textAlign: "center",
-    includeFontPadding: false,
+    textShadowRadius: wp("1%"),
   },
-  headerTablet: {
-    fontSize: wp("12%"),
-    marginBottom: hp("2%"),
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    paddingVertical: hp("2%"),
-    paddingHorizontal: wp("5%"),
-    justifyContent: "flex-start",
-    alignItems: "center",
-  },
-  container: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-  },
-  containerTablet: {
-    gap: wp("6%"),
-    marginTop: hp("3%"),
-  },
+
   catBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -201,95 +152,49 @@ const styles = StyleSheet.create({
     height: hp("8%"),
     borderRadius: wp("50%"),
     marginVertical: hp("1.5%"),
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: wp("0.5%") },
-    shadowOpacity: 0.2,
-    shadowRadius: wp("1%"),
-    elevation: 4,
+    backgroundColor: "white",
   },
-  catBtnSmall: {
-    width: wp("85%"),
-    height: hp("7%"),
-    marginVertical: hp("1%"),
-  },
+
   catBtnTablet: {
-    width: wp("35%"),
-    height: hp("10%"),
-    margin: hp("1.5%"),
-    borderRadius: wp("25%"),
+    width: wp("40%"),
   },
+
   catePng: {
     width: wp("12%"),
     height: wp("12%"),
     resizeMode: "contain",
   },
-  catePngSmall: {
-    width: wp("10%"),
-    height: wp("10%"),
-  },
-  catePngTablet: {
-    width: wp("8%"),
-    height: wp("8%"),
-  },
-  catMiddleText: {
-    fontSize: wp("6%"),
+
+  catText: {
     fontFamily: "Kavoon",
-    textAlign: "center",
-    color: "#333",
     marginLeft: wp("4%"),
-    includeFontPadding: false,
+    color: "#333",
   },
-  catMiddleTextSmall: {
-    fontSize: wp("5.5%"),
-    marginLeft: wp("3%"),
-  },
-  catMiddleTextTablet: {
-    fontSize: wp("5%"),
-    marginLeft: wp("2%"),
-  },
+
   buttonContainer: {
     position: "absolute",
-    bottom: hp("10%"),
+    bottom: hp("8%"),
     left: 0,
     right: 0,
     alignItems: "center",
-    paddingHorizontal: wp("5%"),
   },
+
   btn: {
     width: wp("70%"),
     height: hp("8%"),
     borderWidth: wp("1%"),
+    borderRadius: wp("50%"),
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: wp("50%"),
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: wp("0.5%") },
-    shadowOpacity: 0.25,
-    shadowRadius: wp("1%"),
-    elevation: 5,
+    backgroundColor: "white",
   },
-  btnSmall: {
-    width: wp("75%"),
-    height: hp("7%"),
-  },
+
   btnTablet: {
     width: wp("50%"),
-    height: hp("7%"),
   },
+
   btnText: {
-    fontSize: wp("6%"),
     fontFamily: "Kavoon",
-    textAlign: "center",
     color: "#333",
-    includeFontPadding: false,
-  },
-  btnTextSmall: {
-    fontSize: wp("5.5%"),
-  },
-  btnTextTablet: {
-    fontSize: wp("7%"),
-  },
-  btnTextDisabled: {
-    color: "#999",
   },
 });

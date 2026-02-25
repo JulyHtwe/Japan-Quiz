@@ -6,7 +6,7 @@ import {
   Image,
   Pressable,
   Dimensions,
-  PixelRatio
+  PixelRatio,
 } from "react-native";
 import { useFonts } from "expo-font";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -17,19 +17,13 @@ const BASE_WIDTH = 375;
 const BASE_HEIGHT = 812;
 
 const scale = (size: number) => (width / BASE_WIDTH) * size;
-const verticalScale = (size: number) =>
-  (height / BASE_HEIGHT) * size;
+const verticalScale = (size: number) => (height / BASE_HEIGHT) * size;
 export const scaleFont = (size: number) => {
   const scale = width / BASE_WIDTH;
 
-  // reduce font slightly on small phones
+  // responsive
   const adjusted =
-    width < 350
-      ? scale * 0.85
-      : width < 400
-      ? scale * 0.95
-      : scale;
-
+    width < 350 ? scale * 0.85 : width < 400 ? scale * 0.95 : scale;
   return Math.round(PixelRatio.roundToNearestPixel(size * adjusted));
 };
 
@@ -37,12 +31,15 @@ export default function CompleteScreen() {
   const router = useRouter();
   const { resetResults } = useQuizResult();
 
-  const { score = "0", total = "10", category } =
-    useLocalSearchParams<{
-      score?: string;
-      total?: string;
-      category?: string;
-    }>();
+  const {
+    score = "0",
+    total = "10",
+    category,
+  } = useLocalSearchParams<{
+    score?: string;
+    total?: string;
+    category?: string;
+  }>();
 
   const [fontLoaded] = useFonts({
     Kavoon: require("../assets/fonts/Kavoon-Regular.ttf"),
@@ -57,12 +54,7 @@ export default function CompleteScreen() {
       style={styles.bgImage}
     >
       {/* Title */}
-      <View
-        style={[
-          styles.completeBtn,
-          { marginTop: verticalScale(60) },
-        ]}
-      >
+      <View style={[styles.completeBtn, { marginTop: verticalScale(60) }]}>
         <Image
           style={styles.icon}
           source={require("../assets/images/firework.png")}
@@ -76,46 +68,38 @@ export default function CompleteScreen() {
         >
           Quiz Complete
         </Text>
-
         <Image
           style={styles.icon}
           source={require("../assets/images/firework.png")}
         />
       </View>
-
-      {/* Score Text */}
-      <Text style={[styles.youGot,styles.txtDecoration]}>You got</Text>
-
-      {/* Score */}
+      <Text style={[styles.youGot, styles.txtDecoration]}>You got</Text>
       <View style={styles.scoreRow}>
-        <Text style={[styles.score, { color: "yellow" }]}>
-          {score}
-        </Text>
+        <Text style={[styles.score, { color: "yellow" }]}>{score}</Text>
 
         <Text
           style={[
             styles.score,
-            { color: 'white',fontSize: scaleFont(30), fontFamily: "Margarine" },
+            {
+              color: "white",
+              fontSize: scaleFont(30),
+              fontFamily: "Margarine",
+            },
           ]}
         >
           out
         </Text>
 
-        <Text style={[styles.score, { color: "yellow" }]}>
-          {total}
-        </Text>
+        <Text style={[styles.score, { color: "yellow" }]}>{total}</Text>
       </View>
 
-      {/* Results Button */}
       <Pressable
         onPress={() => router.push("/result")}
         style={({ pressed }) => [
           styles.btn,
           {
             marginTop: verticalScale(10),
-            backgroundColor: pressed
-              ? "#ffe6f0"
-              : "white",
+            backgroundColor: pressed ? "#ffe6f0" : "white",
             transform: [{ scale: pressed ? 0.97 : 1 }],
           },
         ]}
@@ -127,26 +111,28 @@ export default function CompleteScreen() {
         <Text style={styles.middleText}>See Results</Text>
       </Pressable>
 
-      <Text style={[styles.greatJob,styles.txtDecoration]}>Great Job!</Text>
+      <Text style={[styles.greatJob, styles.txtDecoration]}>Great Job!</Text>
 
-      <Text style={[styles.proudText,styles.txtDecoration]}>
+      <Text style={[styles.proudText, styles.txtDecoration]}>
         Japanese is proud of you!
       </Text>
 
-      <Text style={[styles.proudText,styles.txtDecoration,{fontSize: scaleFont(25)}]}>
+      <Text
+        style={[
+          styles.proudText,
+          styles.txtDecoration,
+          { fontSize: scaleFont(25) },
+        ]}
+      >
         Practice makes perfect!
       </Text>
-
-      {/* Buttons Row */}
       <View style={styles.bottomBtns}>
-        {/* Play Again */}
+        {/* play again */}
         <Pressable
           style={({ pressed }) => [
             styles.btn,
             {
-              backgroundColor: pressed
-                ? "#ffe6f0"
-                : "white",
+              backgroundColor: pressed ? "#ffe6f0" : "white",
               transform: [{ scale: pressed ? 0.97 : 1 }],
             },
           ]}
@@ -164,15 +150,10 @@ export default function CompleteScreen() {
         >
           <Image
             source={require("../assets/images/refresh.png")}
-            style={[
-              styles.icon,
-             
-            ]}
+            style={[styles.icon]}
           />
 
-          <Text style={styles.middleText}>
-            Play Again
-          </Text>
+          <Text style={styles.middleText}>Play Again</Text>
         </Pressable>
 
         {/* Exit */}
@@ -180,9 +161,7 @@ export default function CompleteScreen() {
           style={({ pressed }) => [
             styles.btn,
             {
-              backgroundColor: pressed
-                ? "#ffe6f0"
-                : "white",
+              backgroundColor: pressed ? "#ffe6f0" : "white",
               transform: [{ scale: pressed ? 0.97 : 1 }],
             },
           ]}
@@ -207,7 +186,6 @@ export default function CompleteScreen() {
     </ImageBackground>
   );
 }
-
 
 const styles = StyleSheet.create({
   bgImage: { flex: 1 },
@@ -237,7 +215,7 @@ const styles = StyleSheet.create({
 
   btn: {
     flexDirection: "row",
-    marginTop:scale(15),
+    marginTop: scale(15),
     gap: scale(10),
     width: scale(160),
     height: verticalScale(60),
@@ -274,17 +252,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: verticalScale(20),
   },
-  txtDecoration :{
-      color: "white",
-      textAlign: "center",
-      fontWeight: "bold",
-      textShadowColor: "black",
-      textShadowOffset: { width: 3, height: 3 },
-      textShadowRadius: 7,
-    },
+  txtDecoration: {
+    color: "white",
+    textAlign: "center",
+    fontWeight: "bold",
+    textShadowColor: "black",
+    textShadowOffset: { width: 3, height: 3 },
+    textShadowRadius: 7,
+  },
   youGot: {
     fontSize: scaleFont(40),
-    marginTop: verticalScale(20)
+    marginTop: verticalScale(20),
   },
 
   greatJob: {
@@ -294,12 +272,12 @@ const styles = StyleSheet.create({
 
   proudText: {
     fontSize: scaleFont(30),
-    marginTop: verticalScale(30)
+    marginTop: verticalScale(30),
   },
 
   practiceText: {
     fontSize: scaleFont(25),
-    marginTop: verticalScale(30)
+    marginTop: verticalScale(30),
   },
 
   bottomBtns: {
